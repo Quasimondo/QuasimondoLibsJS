@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>QuasimondoLibsJS Demo: Steiner Circles</title>
+	
+	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
+
+	<script src="http://code.createjs.com/easeljs-0.6.1.min.js"></script>
+	<script src="../src/qlib/utils/MathUtils.js"></script>
+	<script src="../src/qlib/geom/GeometricShape.js"></script>
+	<script src="../src/qlib/geom/Vector2.js"></script>
+	<script src="../src/qlib/geom/LineSegment.js"></script>
+	<script src="../src/qlib/geom/Circle.js"></script>
+	<script src="../src/qlib/geom/CircleUtils.js"></script>
+	<script src="../src/qlib/geom/SteinerCircles.js"></script>
+	
+	<script type="text/javascript">
+	var canvas;
+	var stage;
+	
+	var shp;
+	var steiner;
+	var outerCircle;
+	var count = 25;
+	var d = 0;
+	var a = 0;
+	
+	function init() {
+	    canvas = document.getElementById('myCanvas');
+	    width = canvas.width;
+	    height = canvas.height;
+	   
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true;
+		
+		
+		shp = new createjs.Shape();
+		
+	    stage.addChild(shp);
+		
+		steiner = new qlib.SteinerCircles();
+		outerCircle = new qlib.Circle(512,384,330);
+			
+		stage.addEventListener("mousedown", onMouseDown );
+		
+		createjs.Ticker.addEventListener("tick", tick);
+	}
+	
+	function onMouseDown(event)
+	{
+		
+		count--;
+		if ( count < 6 ) count = 25;
+		/*
+		if ( count == 10 )
+		{
+			drawApollonius = !drawApollonius;
+		}
+		*/
+	}
+	
+	function tick(event) {
+		
+		var g = shp.graphics;
+		g.clear();
+		
+		
+		d = 0.85 * d + 0.15 * Math.min(330,( Math.sqrt( Math.pow( 512-stage.mouseX,2)+Math.pow( 384-stage.mouseX,2))));
+		a = 0.98 * a + 0.02 * Math.atan2(512-stage.mouseY,384-stage.mouseX);
+		steiner.calculate(outerCircle,count,-d/330,a,0);
+		
+		
+		g.clear();
+		
+		g.beginFill("#202020");
+		steiner.outerCircle.draw(g);
+		g.endFill();
+		g.beginFill("#ccc");
+		steiner.draw(g);
+	//	g.endFill()
+		
+		stage.update(event);
+		
+	}
+	
+	
+
+	</script>
+
+</head>
+<body onload="init()">
+
+	<header id="header" class="EaselJS">
+	    <h1><span class="text-product"><strong>QuasimondoLibs</strong> Demo:</span></h1>
+	    <p>Steiner Circles</p>
+	</header>
+
+	<canvas id="myCanvas" width="1000" height="1000"></canvas>
+
+</body>
+</html>

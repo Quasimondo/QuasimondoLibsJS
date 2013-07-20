@@ -27,7 +27,7 @@
 	var shp;
 	var c1, c2, c3;
 	var h1, h2, h3;
-	var update;
+	
 	
 	function init() {
 	    canvas = document.getElementById('myCanvas');
@@ -69,7 +69,6 @@
 		h2.setActive(true);
 		h3.setActive(true);
 		
-		update = true;
 		createjs.Ticker.addEventListener("tick", tick);
 	}
 	
@@ -112,26 +111,24 @@
 				h2.updatePoint( ct2.c );
 			}
 		}
-		update = true;
+		
 	}
 	
 	function tick(event) {
-		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
-		//if (update) {
-		//	update = false; // only update once
-			  var g = shp.graphics;
-			g.clear();
-			g.setStrokeStyle(1, 'round', 'round');
-			g.beginStroke("#ccc");
-			c1.draw(g);
-			c2.draw(g);
-			c3.draw(g);
-			g.beginStroke("#ff8000");
-			var soddyCircles = qlib.CircleUtils.getSoddyCircles(c1,c2,c3);
-			if ( soddyCircles[0] )  soddyCircles[0].draw(g);
-			if ( soddyCircles[1] )  soddyCircles[1].draw(g);
-			stage.update(event);
-		//}
+		
+		 var g = shp.graphics;
+		g.clear();
+		g.setStrokeStyle(1, 'round', 'round');
+		g.beginStroke("#ccc");
+		c1.draw(g);
+		c2.draw(g);
+		c3.draw(g);
+		g.beginStroke("#ff8000");
+		var soddyCircles = qlib.CircleUtils.getSoddyCircles(c1,c2,c3);
+		if ( soddyCircles[0] )  soddyCircles[0].draw(g);
+		if ( soddyCircles[1] )  soddyCircles[1].draw(g);
+		stage.update(event);
+		
 	}
 	
 	

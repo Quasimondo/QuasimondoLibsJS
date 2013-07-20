@@ -68,12 +68,26 @@ var p = Vector2.prototype;
 			this.y = ( args[1] == null ? 0 : args[1]);
 		} else {
 			this.x = args[0].x;
-			this.y = args[1].y;
+			this.y = args[0].y;
 		}
 	}
 	
 // public methods:
 
+	p.setValue = function()
+	{
+		if (arguments.length == 0)
+		{ 
+			this.x = this.y = 0;
+		} else if ( typeof arguments[0] == "number" )
+		{	
+			this.x = ( arguments[0] == null ? 0 : arguments[0]);
+			this.y = ( arguments[1] == null ? 0 : arguments[1]);
+		} else {
+			this.x = arguments[0].x;
+			this.y = arguments[0].y;
+		}
+	}
 
 	p.squaredDistanceToVector = function( v )
 	{
@@ -104,6 +118,110 @@ var p = Vector2.prototype;
 	{
 		return this.squaredDistanceToVector( v ) < ( squaredSnapDistance == null ? 0.00000001 : squaredSnapDistance);
 	};
+	
+	p.getLength = function()
+	{
+		return Math.sqrt( this.x * this.x + this.y * this.y );
+	}
+		
+	p.getSquaredLength = function()
+	{
+		return this.x * this.x + this.y * this.y;
+	}
+		
+	p.getAngle = function( )
+	{
+		return Math.atan2( this.y , this.x );
+	}
+	
+	p.newLength = function( len )
+	{
+		var l = this.getLength();
+		if ( l == 0 ) return this;
+		this.x *= len / l;
+		this.y *= len / l;
+		
+		return this;
+	}
+	
+	p.getNewLength = function( len )
+	{
+		var l = this.getLength();
+		return new qlib.Vector2( this.x / l * len, this.y / l * len );
+	}
+	
+	p.plus = function( v )
+	{
+		this.x += v.x;
+		this.y += v.y;
+		return this;
+	}
+	
+	p.getPlus = function( v )
+	{
+		return new qlib.Vector2( this.x + v.x, this.y + v.y );
+	}
+	
+	p.plusXY = function( tx, ty )
+	{
+		this.x += tx;
+		this.y += ty;
+		return this;
+	}
+	
+	p.getPlusXY = function( tx, ty )
+	{
+		return new qlib.Vector2( this.x + tx, this.y + ty );
+	}
+	
+	p.minus = function( v )
+	{
+		this.x -= v.x;
+		this.y -= v.y;
+		return this;
+	}
+	
+	p.getMinus = function( v )
+	{
+		return new qlib.Vector2( this.x - v.x, this.y - v.y );
+	}
+	
+	p.multiply = function( f )
+	{
+		this.x *= f;
+		this.y *= f;
+		return this;
+	}
+	
+	p.getMultiply = function( f )
+	{
+		return new qlib.Vector2( this.x * f, this.y * f );
+	}
+	
+	p.multiplyXY = function( fx, fy )
+	{
+		this.x *= fx;
+		this.y *= fy;
+		return this;
+	}
+	
+	p.getMultiplyXY = function( fx, fy )
+	{
+		return new qlib.Vector2( this.x * fx, this.y * fy );
+	}
+	
+	p.divide = function( d )
+	{
+		this.x /= d;
+		this.y /= d;
+		return this;
+	}
+	
+	p.getDivide = function( d )
+	{
+		return new qlib.Vector2( this.x / d, this.y / d );
+	}
+	
 	
 	/**
 	 * Returns a clone of the Vector2 instance.
