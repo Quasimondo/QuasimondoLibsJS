@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>QuasimondoLibsJS Demo: Soddy Circles</title>
+	
+	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
+
+	<script src="http://code.createjs.com/easeljs-0.6.1.min.js"></script>
+	<script src="../src/qlib/utils/MathUtils.js"></script>
+	<script src="../src/qlib/geom/GeometricShape.js"></script>
+	<script src="../src/qlib/geom/Vector2.js"></script>
+	<script src="../src/qlib/geom/LineSegment.js"></script>
+	<script src="../src/qlib/geom/Circle.js"></script>
+	<script src="../src/qlib/geom/CircleUtils.js"></script>
+	<script src="../src/qlib/geom/Intersection.js"></script>
+	<script src="../src/qlib/ui/Handle.js"></script>
+	<script src="../src/qlib/events/Event.js"></script>
+	
+	<!-- We also provide hosted minified versions of all CreateJS libraries.
+	  http://code.createjs.com -->
+
+	<script type="text/javascript">
+	var canvas;
+	var stage;
+	
+	var shp;
+	var c1, c2, c3;
+	var h1, h2, h3;
+	var update;
+	
+	function init() {
+	    canvas = document.getElementById('myCanvas');
+	    width = canvas.width;
+	    height = canvas.height;
+	   
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true;
+		
+		
+		shp = new createjs.Shape();
+		
+	    c1 = new qlib.Circle( 200, 230, 60 );
+		c2 = new qlib.Circle( 400, 300, 0 );
+		c2.r = c2.c.distanceToVector(c1.c)-c1.r;
+		c3 = qlib.CircleUtils.getTangentCircle(c1,c2,50,true);
+	    
+		h1 = new qlib.Handle(c1.c);
+		h2 = new qlib.Handle(c2.c);
+		h3 = new qlib.Handle(c3.c);
+		
+		stage.addChild(shp);
+		
+		stage.addChild(h1);
+		stage.addChild(h2);
+		stage.addChild(h3);
+		
+		h1.addEventListener("change", onHandleChanged);
+		h2.addEventListener("change", onHandleChanged);
+		h3.addEventListener("change", onHandleChanged);
+		
+		h1.setActive(true);
+		h2.setActive(true);
+		h3.setActive(true);
+		
+		update = true;
+		createjs.Ticker.addEventListener("tick", tick);
+	}
+	
+	function onHandleChanged(event)
+	{
+		if ( event.target == h1 )
+		{
+			c1.r = c1.c.distanceToVector(c2.c) - c2.r;
+			var ct1 = qlib.CircleUtils.getTangentCircle( c1,c2,c3.r,true);
+			var ct2 = qlib.CircleUtils.getTangentCircle( c1,c2,c3.r,false);
+			if ( ct1 == null || ct2 == null ) return;
+			if ( c3.c.distanceToVector(ct1.c) < c3.c.distanceToVector(ct2.c) )
+			{
+				h3.updatePoint( ct1.c );
+			} else {
+				h3.updatePoint( ct2.c );
+			}
+		} else if ( event.target == h2)
+		{
+			c2.r = c2.c.distanceToVector(c3.c) - c3.r;
+			var ct1 = qlib.CircleUtils.getTangentCircle( c2,c3,c1.r,true);
+			var ct2 = qlib.CircleUtils.getTangentCircle( c2,c3,c1.r,false);
+			if ( ct1 == null || ct2 == null ) return;
+			if ( c1.c.distanceToVector(ct1.c) < c1.c.distanceToVector(ct2.c) )
+			{
+				h1.updatePoint( ct1.c );
+			} else {
+				h1.updatePoint( ct2.c );
+			}
+		} else if ( event.target == h3)
+		{
+			c3.r = c3.c.distanceToVector(c1.c) - c1.r;
+			var ct1 = qlib.CircleUtils.getTangentCircle( c3,c1,c2.r,true);
+			var ct2 = qlib.CircleUtils.getTangentCircle( c3,c1,c2.r,false);
+			if ( ct1 == null || ct2 == null ) return;
+			if ( c2.c.distanceToVector(ct1.c) < c2.c.distanceToVector(ct2.c) )
+			{
+				h2.updatePoint( ct1.c );
+			} else {
+				h2.updatePoint( ct2.c );
+			}
+		}
+		update = true;
+	}
+	
+	function tick(event) {
+		// this set makes it so the stage only re-renders when an event handler indicates a change has happened.
+		//if (update) {
+		//	update = false; // only update once
+			  var g = shp.graphics;
+			g.clear();
+			g.setStrokeStyle(1, 'round', 'round');
+			g.beginStroke("#ccc");
+			c1.draw(g);
+			c2.draw(g);
+			c3.draw(g);
+			g.beginStroke("#ff8000");
+			var soddyCircles = qlib.CircleUtils.getSoddyCircles(c1,c2,c3);
+			if ( soddyCircles[0] )  soddyCircles[0].draw(g);
+			if ( soddyCircles[1] )  soddyCircles[1].draw(g);
+			stage.update(event);
+		//}
+	}
+	
+	
+
+	</script>
+
+</head>
+<body onload="init()">
+
+	<header id="header" class="EaselJS">
+	    <h1><span class="text-product"><strong>QuasimondoLibs</strong> Demo:</span></h1>
+	    <p>Soddy Circles - Drag the Circle Centers</p>
+	</header>
+
+	<canvas id="myCanvas" width="1000" height="1000"></canvas>
+
+</body>
+</html>
