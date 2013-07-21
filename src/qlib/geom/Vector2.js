@@ -91,6 +91,10 @@ var p = Vector2.prototype;
 
 	p.squaredDistanceToVector = function( v )
 	{
+		if (  v == null )
+		{
+			throw("Vector2.squaredDistanceToVector: null passed in");
+		}
 		var dx = this.x - v.x;
 		var dy = this.y - v.y;
 		return dx * dx + dy * dy;
@@ -239,12 +243,12 @@ var p = Vector2.prototype;
 		return Math.atan2( this.y , this.x );
 	}
 	
-	p.getAngleTo= function( v )
+	p.getAngleTo = function( v )
 	{
 		return Math.atan2( v.y - this.y, v.x - this.x );
 	};
 	
-	p.dot= function( v )
+	p.dot = function( v )
 	{
 		return this.x * v.x + this.y * v.y;
 	}
@@ -264,6 +268,43 @@ var p = Vector2.prototype;
 		return v1.getMinus(this).angleBetween( v2.getMinus(this) );
 	}
 	
+	p.reset = function( )
+	{
+		this.x = this.y = 0;
+		return this;
+	}
+	
+	p.reflect = function( normal )
+	{
+		var dp = 2 * this.dot( normal );
+		
+		this.x -= normal.x * dp;
+		this.y -= normal.y * dp;
+		
+		return this;
+	}
+	
+	p.getReflect = function( normal )
+	{
+		var dp = 2 * this.dot( normal );
+		
+		return new qlib.Vector2( this.x - normal.x * dp, this.y - normal.y * dp );
+	}
+	
+	p.mirror = function( vector )
+	{
+		
+		this.x = 2 * vector.x - this.x;
+		this.y = 2 * vector.y - this.y;
+		
+		return this;
+	}
+	
+	p.getMirror = function( vector )
+	{
+		
+		return new Vector2( 2 * vector.x - this.x, 2 * vector.y - this.y );
+	}
 	
 	p.getProject = function( a, b )
 	{
@@ -293,6 +334,120 @@ var p = Vector2.prototype;
 		return this;
 	}
 	
+	p.negate = function( )
+	{
+		this.x *= -1;
+		this.y *= -1;
+		return this;
+	}
+		
+	p.getNegate = function()
+	{
+		return new qlib.Vector2( -this.x , -this.y );
+	}
+		
+	p.orth = function()
+	{
+		var tx = -this.y;
+		this.y = this.x;
+		this.x = tx;
+		return this;
+	}
+		
+	p.getOrth = function()
+	{
+		return new qlib.Vector2( -this.y, this.x );
+	}
+		
+	p.normalize = function()
+	{
+		var l = this.getLength();
+		if ( l != 0 )
+		{
+			this.x /= l;
+			this.y /= l;
+		} else {
+			this.x = this.y = 0;
+		}
+		return this;
+	}
+		
+	p.getNormalize = function()
+	{
+		var l = this.getLength();
+		if ( l != 0 )
+		{
+			return new qlib.Vector2( this.x / l, this.y / l );
+		} else {
+			return new qlib.Vector2();
+		}
+	}
+		
+	p.normal = function()
+	{
+		var l = this.getLength();
+		if ( l != 0 )
+		{
+			var tx = -this.y / l;
+			this.y = this.x / l;
+			this.x = tx;
+		} else {
+			this.x = this.y = 0;
+		}
+		return this;
+	}
+		
+	p.getNormal = function()
+	{
+		var l = this.getLength();
+		if ( l != 0 )
+			return new qlib.Vector2 ( -this.y / l, this.x / l );
+		else
+			return new qlib.Vector2();
+	}
+	
+	p.rotateAround = function( angle, rotationPoint )
+	{
+		this.minus(rotationPoint);
+		this.rotateBy( angle );
+		this.plus(rotationPoint);
+		return this;
+	 }
+	
+	p.getRotateAround = function( angle, rotationPoint )
+	{
+		var p = this.getMinus(rotationPoint);
+		p.rotateBy( angle );
+		p.plus(rotationPoint);
+		return p;
+	}
+	
+	p.rotateBy = function( angle )
+	{
+		var ca = Math.cos ( angle );
+		var sa = Math.sin ( angle );
+		var rx = this.x * ca - this.y * sa;
+		this.y = this.x * sa + this.y * ca;
+		this.x = rx;
+		return this;
+	}
+	
+	p.rotateByCosSin = function( ca, sa )
+	{
+		var rx = this.x * ca - this.y * sa;
+		this.y = this.x * sa + this.y * ca;
+		this.x = rx;
+		return this;
+	}
+	
+	p.getRotateBy = function( angle )
+	{
+		var ca = Math.cos ( angle );
+		var sa = Math.sin ( angle );
+		var rx = this.x * ca - this.y * sa;
+		
+		return new qlib.Vector2( rx, this.x * sa + this.y * ca );
+	}
 	
 	/**
 	 * Returns a clone of the Vector2 instance.

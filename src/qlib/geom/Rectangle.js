@@ -68,8 +68,28 @@ var p = Rectangle.prototype = new qlib.GeometricShape();
 		}
 	}
 	
+	p.scale = function( factorX, factorY, center )
+	{
+		if ( center == null ) center = new qlib.Vector2( this.x + this.width * 0.5, this.y + this.height * 0.5);
+		var newXY = new qlib.Vector2( this.x, this.y).minus( center ).multiplyXY( factorX, factorY ).plus( center );
+		this.x = newXY.x;
+		this.y = newXY.y;
+		this.width *= factorX;
+		this.height *= factorY;
+		this.fixValues();
+		return this;
+	}
+	
 	p.union = function( rect )
 	{
+		if ( this.width == 0 || this.height == 0 )
+		{
+			return rect.clone();
+		}
+		if ( rect.width == 0 || rect.height == 0 )
+		{
+			return this.clone();
+		}
 		var minx = Math.min( this.x, rect.x );
 		var miny = Math.min( this.y, rect.y );
 		var maxx = Math.max( this.x + this.width, rect.x + rect.width);

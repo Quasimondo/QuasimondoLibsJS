@@ -64,6 +64,29 @@ this.qlib = this.qlib||{};
 	}
 	
 // public methods:
+
+
+	p.translate = function( p )
+	{
+		this.c.plus( p );
+		return this;
+	}
+	
+	p.scale = function( factor, center )
+	{
+		if ( center == null ) center = this.c.getClone();
+		this.c.minus( center ).multiply( factor ).plus( center );
+		this.r *= factor;
+		return this;
+	}
+	
+	p.rotate = function( angle, center )
+	{
+		if ( center == null ) center = this.c.getClone();
+		this.c.rotateAround( angle, center );
+		return this;
+	}
+
 	/**
 	 * Returns a clone of the Circle instance.
 	 * @method clone
