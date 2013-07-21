@@ -1,5 +1,5 @@
 /*
-* Circle
+* TriangleUtils
 *
 * Copyright (c) 2013 Mario Klingemann
 * 
@@ -30,38 +30,30 @@ this.qlib = this.qlib||{};
 
 (function() {
 
-var GeometricShape = function() {
-  
-}
-var p = GeometricShape.prototype;
+	var TriangleUtils = function() {}
 	
-// public properties:
-
-	p.type = "GeometricShape";
-	
-	/**
-	 * Returns a string representation of this object.
-	 * @method toString
-	 * @return {String} a string representation of the instance.
-	 **/
-	p.intersect = function( s ) {
-		return qlib.Intersection.intersect( this, s );
-	}
-
-	p.draw = function( graphics )
+	TriangleUtils.getCenteredTriangle = function( center, leftLength, rightLength, bottomLength, angle  )
 	{
-		throw("draw() not implented yet in "+this.type);
+		angle = ( angle == null ? angle : 0 );
+		var alpha = - Math.acos( ( leftLength * leftLength - rightLength * rightLength + bottomLength * bottomLength ) / ( 2 * leftLength * bottomLength) );
+		if ( isNaN( alpha )) return null;
+		
+		var v1 = new qlib.Vector2(0,0);
+		var v2 = new qlib.Vector2(bottomLength,0 );
+		var v3 = new qlib.Vector2( Math.cos( alpha ) * leftLength, Math.sin( alpha ) * leftLength );
+		
+		var triangle = new qlib.Triangle( v1, v2, v3 );
+		var ctr = triangle.centerOfMass();
+		if ( angle != 0 ) triangle.rotate( angle );
+		triangle.translate( center.getMinus( ctr ) );
+		return triangle;
+	}
+		
+	TriangleUtils.getEquilateralTriangle = function( pa, pb, flipped )
+	{
+		flipped = ( flipped == 0 ? false : flipped );
+		return new qlib.Triangle( pa, pb, new qlib.Vector2( pa.getAddCartesian(pa.angleTo(pb) +  Math.PI / 3 * ( flipped ? -1 : 1), pa.distanceToVector( pb ))) );
 	}
 	
-	
-	/**
-	 * Returns a string representation of this object.
-	 * @method toString
-	 * @return {String} a string representation of the instance.
-	 **/
-	p.toString = function() {
-		return this.type;
-	}
-	
-qlib.GeometricShape = GeometricShape;
+qlib.TriangleUtils = TriangleUtils;
 }());

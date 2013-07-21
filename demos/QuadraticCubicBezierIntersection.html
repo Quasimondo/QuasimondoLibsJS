@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>QuasimondoLibsJS Demo: Cubic Bezier/Cubic Bezier Intersection</title>
+	<title>QuasimondoLibsJS Demo: Quadratic Bezier/Cubic Bezier Intersection</title>
 	
 	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
 
@@ -12,6 +12,7 @@
 	<script src="../src/qlib/geom/GeometricShape.js"></script>
 	<script src="../src/qlib/geom/Vector2.js"></script>
 	<script src="../src/qlib/geom/LineSegment.js"></script>
+	<script src="../src/qlib/geom/Bezier2.js"></script>
 	<script src="../src/qlib/geom/Bezier3.js"></script>
 	<script src="../src/qlib/geom/Circle.js"></script>
 	<script src="../src/qlib/geom/CircleUtils.js"></script>
@@ -52,7 +53,7 @@
 		
 		handles = [];
 			
-		for ( var i = 0; i < 8; i++ )
+		for ( var i = 0; i < 7; i++ )
 		{
 			var h = new qlib.Handle( new qlib.Vector2( Math.random()*500,  Math.random()*500));
 			stage.addChild(h);
@@ -60,8 +61,8 @@
 			handles.push(h); 
 		}
 		
-		curve1 = new  qlib.Bezier3( handles[0].point, handles[1].point, handles[2].point, handles[3].point);
-		curve2 = new  qlib.Bezier3( handles[4].point, handles[5].point, handles[6].point, handles[7].point);
+		curve1 = new  qlib.Bezier2( handles[0].point, handles[1].point, handles[2].point);
+		curve2 = new  qlib.Bezier3( handles[3].point, handles[4].point, handles[5].point, handles[6].point);
 		
 	   createjs.Ticker.addEventListener("tick", tick);
 	}
@@ -96,7 +97,7 @@
 
 	<header id="header" class="EaselJS">
 	    <h1><span class="text-product"><strong>QuasimondoLibs</strong> Demo:</span></h1>
-	    <p>Cubic Bezier/Cubic Bezier Intersections - Drag the handles</p>
+	    <p>Quadratic Bezier/Cubic Bezier Intersections - Drag the handles</p>
 	</header>
 
 	<canvas id="myCanvas" width="1000" height="1000"></canvas>

@@ -133,5 +133,244 @@ this.qlib = this.qlib||{};
 		return new qlib.Circle(m[7],m[ 11 ],  Math.sqrt( m[7] * m[7] + m[11] * m[11] - m[3]) );
 	}
 	
+	CircleUtils.getRingByCount = function( c, count, angleOffset, outerRing  )
+	{
+		if ( count < 2 ) count = 2;
+		angleOffset = ( angleOffset == null ? 0 : angleOffset );
+		outerRing = ( outerRing == null ? true : outerRing);
+		if ( outerRing && count < 3 ) count = 3;
+		
+		var result = [];
+		var f = ( outerRing ? 1: -1);
+		var u = (2 * Math.PI * c.r) / ( 1 - Math.PI * f / count ); 
+		
+		var angle = Math.PI * 2 / (count * 2);
+		var sa = Math.sin(angle);
+		if ( sa != 1 )
+		{
+			var radius = ( c.r * sa ) / ( 1 - sa * f );
+			var aStep = Math.PI * 2 / count;
+			for ( var i = 0 ; i < count; i++ )
+			{
+				result.push( new qlib.Circle( c.c.getAddCartesian(angleOffset+i*aStep, c.r + radius * f),radius));
+			}
+		}
+		return result;
+	}
+	
+	
+	CircleUtils.areKissingCircles = function( c1, c2, c3 )
+	{
+		return (Math.abs(c1.c.distanceToVector(c2.c) - (c1.r + c2.r)) < 0.000001) && 
+			   (Math.abs(c1.c.distanceToVector(c3.c) - (c1.r + c3.r)) < 0.000001) &&
+			   (Math.abs(c2.c.distanceToVector(c3.c) - (c2.r + c3.r)) < 0.000001);
+	}
+	
+	/**
+	 * @author Nicolas Barradeau
+	 * http://en.nicoptere.net
+	 *
+	 * http://en.wikipedia.org/wiki/Problem_of_Apollonius
+	 * http://mathworld.wolfram.com/ApolloniusProblem.html
+	 * code adapted for quasimondolibs 
+	 */
+	//
+	//
+	CircleUtils.apolloniusCircles = function( c0, c1, c2 )
+	{
+		
+		var v;
+		var hc = [];
+		
+		v = this.homotheticCenters( c0, c1 );
+		if ( v != null ) hc.push( v[0], v[1] );
+		
+		v = this.homotheticCenters( c1, c2 );
+		if ( v != null ) hc.push( v[0], v[1] );
+		
+		v = this.homotheticCenters( c2, c0 );
+		if ( v != null ) hc.push( v[0], v[1] );
+		
+		if ( hc.length != 6 ) return null;//erf... 2 tangents are coincident
+		
+		var p;
+		var t0, t1;
+		var angle, dist0, dist1 = 0, i, c;
+		var radicalCenter = this.radicalCenter( c0, c1, c2 );
+		var innerTangents = [];
+		var outerTangents = [];
+		var ac =[];
+		
+		var lines =  [	hc[ 1 ], hc[ 2 ],
+			hc[ 2 ], hc[ 5 ],
+			hc[ 3 ], hc[ 4 ],
+			hc[ 1 ], hc[ 3 ]];
+		
+		for ( i = 0; i < lines.length; i+=2 )
+		{
+			p = c0.inversionPointFromPole( lines[ i ], lines[ i + 1 ] );
+			
+			
+			v = qlib.IntersectionUtils.lineCircleIntersection( p, radicalCenter, c0 );
+			if ( v != null )
+			{
+				if ( v.length == 1 )
+				{
+					innerTangents.push( v[ 0 ] );
+					outerTangents.push( v[ 0 ] );
+				}
+				else
+				{
+					dist0 = radicalCenter.distanceToVector( v[ 0 ] );
+					dist1 = radicalCenter.distanceToVector( v[ 1 ] );
+					innerTangents.push( ( dist0 < dist1 ) ? v[ 0 ] : v[ 1 ] );
+					outerTangents.push( ( dist0 >= dist1 ) ? v[ 0 ] : v[ 1 ] );
+				}
+			}
+			
+			p = c1.inversionPointFromPole( lines[ i ], lines[ i + 1 ] );
+			v = qlib.IntersectionUtils.lineCircleIntersection( p, radicalCenter, c1 );
+			if ( v != null )
+			{
+				if ( v.length == 1 )
+				{
+					innerTangents.push( v[ 0 ] );
+					outerTangents.push( v[ 0 ] );
+				}
+				else
+				{
+					dist0 = radicalCenter.distanceToVector( v[ 0 ] );
+					dist1 = radicalCenter.distanceToVector( v[ 1 ] );
+					innerTangents.push( ( dist0 < dist1 ) ? v[ 0 ] : v[ 1 ] );
+					outerTangents.push( ( dist0 >= dist1 ) ? v[ 0 ] : v[ 1 ] );
+				}
+			}
+			
+			p = c2.inversionPointFromPole( lines[ i ], lines[ i + 1 ] );
+			v = qlib.IntersectionUtils.lineCircleIntersection( p, radicalCenter, c2 );
+			if ( v != null )
+			{
+				if ( v.length == 1 )
+				{
+					innerTangents.push( v[ 0 ] );
+					outerTangents.push( v[ 0 ] );
+				}
+				else
+				{
+					dist0 = radicalCenter.distanceToVector( v[ 0 ] );
+					dist1 = radicalCenter.distanceToVector( v[ 1 ] );
+					innerTangents.push( ( dist0 < dist1 ) ? v[ 0 ] : v[ 1 ] );
+					outerTangents.push( ( dist0 >= dist1 ) ? v[ 0 ] : v[ 1 ] );
+				}
+			}				
+		}
+		
+		for ( i = 0; i < innerTangents.length; i += 3 )
+		{
+			switch( ( i/3 ) | 0 )
+			{
+				case 0:
+					t0 = new qlib.Triangle( innerTangents[i], innerTangents[i+1], outerTangents[i+2] );
+					t1 = new qlib.Triangle( outerTangents[i], outerTangents[i + 1], innerTangents[i + 2] );
+					break;
+				
+				case 1:
+					t0 = new qlib.Triangle( innerTangents[ i ], outerTangents[ i + 1 ], innerTangents[ i + 2 ] );
+					t1 = new qlib.Triangle( outerTangents[ i ], innerTangents[ i + 1 ], outerTangents[ i + 2 ] );
+					break;
+				
+				case 2:
+					t0 = new qlib.Triangle( innerTangents[ i ], outerTangents[ i + 1 ], outerTangents[ i + 2 ] );
+					t1 = new qlib.Triangle( outerTangents[ i ], innerTangents[ i + 1 ], innerTangents[ i + 2 ] );
+					break;
+				
+				case 3:
+					t0 = new qlib.Triangle( innerTangents[ i ], innerTangents[ i + 1 ], innerTangents[ i + 2 ] );
+					t1 = new qlib.Triangle( outerTangents[ i ], outerTangents[ i + 1 ], outerTangents[ i + 2 ] );
+					break;
+				
+			}
+			
+			c = t0.getBoundingCircle();
+			if ( c != null ) ac.push( c );
+			
+			c = t1.getBoundingCircle();
+			if( c != null ) ac.push( c );
+			
+		}
+		return ac;
+	}
+	
+	//http://mathworld.wolfram.com/HomotheticCenter.html
+	/**
+	 * return the homothetic centers of 2 circles
+	 * @param	circle0
+	 * @param	circle1
+	 * @return
+	 */
+	CircleUtils.homotheticCenters = function( circle0, circle1 )
+	{
+		var a = circle0.c.getAngleTo( circle1.c ) + Math.PI * 0.5;
+		var p0 = circle0.c.getAddCartesian(a,circle0.r);
+		var p1 = circle1.c.getAddCartesian(a,circle1.r);
+		
+		var externalCenter = qlib.IntersectionUtils.lineIntersectLine( circle0.c, circle1.c, p0, p1, false, false );
+		p0 = circle0.c.getAddCartesian(a,-circle0.r);
+		var internalCenter = qlib.IntersectionUtils.lineIntersectLine( circle0.c, circle1.c, p0, p1, false, false );
+		
+		if ( internalCenter == null || externalCenter == null ) return null;
+		return[ internalCenter, externalCenter ];
+		
+	}
+	
+	
+	//http://mathworld.wolfram.com/RadicalLine.html
+	/**
+	 * computes the radical line of 2 circles, length is for decoration purpose
+	 * @param	circle0
+	 * @param	circle1
+	 * @param	length
+	 * @return
+	 */
+	CircleUtils.radicalLine = function( circle0, circle1, length )
+	{
+		length = ( length == null ? -1 : length );
+		var r0 = circle0.r;
+		var r1 = circle1.r;
+		var d = circle0.c.distanceToVector( circle1.c );
+		var angle = circle0.c.getAngleTo( circle1.c );
+		
+		var d0 = ( ( d * d ) + ( r0 * r0 ) - ( r1 * r1 ) ) / ( d * 2 );
+		
+		if ( length < 0 ) length = d0;
+		
+		var p =	new qlib.Vector2(  circle0.c.x + Math.cos( angle ) * d0, 
+			circle0.c.y + Math.sin( angle ) * d0 );
+		return  [
+			new qlib.Vector2(  p.x + Math.cos( angle + Math.PI /2 ) * length, 
+				p.y + Math.sin( angle + Math.PI /2 ) * length ),
+			new qlib.Vector2(  p.x + Math.cos( angle - Math.PI /2 ) * length, 
+				p.y + Math.sin( angle - Math.PI /2 ) * length )
+		];
+	}
+	
+	//http://mathworld.wolfram.com/RadicalCenter.html
+	/**
+	 * returns the radical center ; the intersection Vector2 of 2 of the radical lines
+	 * @param	circle0
+	 * @param	circle1
+	 * @param	circle2
+	 * @return
+	 */
+	CircleUtils.radicalCenter = function( circle0, circle1, circle2 )
+	{
+		
+		var rl0 = this.radicalLine( circle0, circle1 );
+		var rl1 = this.radicalLine( circle0, circle2 );
+		return qlib.IntersectionUtils.lineIntersectLine( rl0[0], rl0[1], rl1[0], rl1[1], false, false );
+	}
+		
+		
+	
 qlib.CircleUtils = CircleUtils;
 }());

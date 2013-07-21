@@ -1,5 +1,5 @@
 /*
-* LineSegment
+* Quadratic Bezier Curve
 *
 * Copyright (c) 2013 Mario Klingemann
 * 
@@ -30,14 +30,14 @@ this.qlib = this.qlib||{};
 
 (function() {
 
-var Bezier3 = function() {
+var Bezier2 = function() {
   this.initialize( arguments );
 }
 
-var p = Bezier3.prototype = new qlib.GeometricShape();
+var p = Bezier2.prototype = new qlib.GeometricShape();
 
 // public properties:
-	p.type = "Bezier3";
+	p.type = "Bezier2";
 	
 	
 	// constructor:
@@ -58,18 +58,10 @@ var p = Bezier3.prototype = new qlib.GeometricShape();
 		}
 		if ( typeof args[i] == "number" )
 		{	
-			this.c1 = new qlib.Vector2( args[i], args[i+1] );
+			this.c = new qlib.Vector2( args[i], args[i+1] );
 			i += 2;
 		} else {
-			this.c1 = args[i];
-			i++;
-		}
-		if ( typeof args[i] == "number" )
-		{	
-			this.c2 = new qlib.Vector2( args[i], args[i+1] );
-			i += 2;
-		} else {
-			this.c2 = args[i];
+			this.c = args[i];
 			i++;
 		}
 		if ( typeof args[i] == "number" )
@@ -78,44 +70,18 @@ var p = Bezier3.prototype = new qlib.GeometricShape();
 		} else {
 			this.p2 = args[i];
 		}
-		this.updateFactors();
-	}
-	
-	p.updateFactors = function()
-	{
-		this.gx = 3 * (this.c1.x - this.p1.x);
-		this.bx = 3 * (this.c2.x - this.c1.x) - this.gx;
-		this.ax = this.p2.x - this.p1.x - this.bx - this.gx;
 		
-		this.gy = 3 * (this.c1.y - this.p1.y);
-		this.by = 3 * (this.c2.y - this.c1.y) - this.gy;
-		this.ay = this.p2.y - this.p1.y - this.by - this.gy;
-		
-		this.pre_pt = {};
-		this.pre_seg = {};
-		
-		this.dirty = false;
-		
-	}
-	
-	p.intersect = function( s ) {
-		this.updateFactors();
-		return qlib.Intersection.intersect( this, s );
 	}
 	
 // public methods:
-	
+
+
 	p.getPoint = function( t ) 
 	{
-		if ( this.pre_pt[t] == null ) 
-		{
-			var ts = t*t;
-			this.pre_pt[t] = new qlib.Vector2 (  this.ax*ts*t +  this.bx*ts +  this.gx*t +  this.p1.x,  this.ay*ts*t +  this.by*ts +  this.gy*t +  this.p1.y );
-		}
-		return this.pre_pt[t];
-		
+		var ti = 1-t;
+		return new qlib.Vector2( ti*ti*this.p1.x+2*t*ti*this.c.x+t*t*this.p2.x , ti*ti*this.p1.y+2*t*ti*this.c.y+t*t*this.p2.y);
 	}
-	
+
 	/**
 	 * Returns a clone of the LineSegment instance.
 	 * @method clone
@@ -123,9 +89,9 @@ var p = Bezier3.prototype = new qlib.GeometricShape();
 	 **/
 	p.clone = function( deepClone ) {
 		if ( deepClone == true )
-			return new qlib.Bezier3( this.p1.clone(), this.c1.clone(), this.c2.clone(), this.p2.clone());
+			return new qlib.Bezier2( this.p1.clone(), this.c.clone(), this.p2.clone());
 		else 
-			return new qlib.Bezier3( this.p1, this.c1, this.c2, this.p2 );
+			return new qlib.Bezier2( this.p1, this.c, this.p2 );
 	}
 	
 	p.moveToStart = function( g )
@@ -139,46 +105,27 @@ var p = Bezier3.prototype = new qlib.GeometricShape();
 		this.drawTo( g );
 	}
 	
-	p.drawNicely = function(g, segmentLength ) 
-	{
-		this.moveToStart( g );
-		this.drawToNicely( g, segmentLength );
-	}
-	
-	p.drawToNicely = function(g, segmentLength)
-	{
-		segmentLength = ( segmentLength == null ? 4 : segmentLength);
-		var t_step = segmentLength / this.length;
-		for ( var t = t_step; t < 1.0; t+=t_step )
-		{
-			var p = this.getPoint(t);
-			g.lineTo(this.p.x,this.p.y);
-		}
-		g.lineTo(this.p2.x,this.p2.y);
-	}
-	
 	p.drawExtras = function(g, factor ) 
 	{
 		factor = ( factor == null ? 1 : factor);
 		this.moveToStart( g );
-		g.lineTo(this.c1.x, this.c1.y);
-		g.moveTo(this.c2.x, this.c2.y);
+		g.lineTo(this.c.x, this.c.y);
 		g.lineTo(this.p2.x, this.p2.y);
 		
 		this.p1.draw(g,factor);
 		this.p2.draw(g,factor);
-		this.c1.draw(g,factor);
-		this.c2.draw(g,factor);
+		this.c.draw(g,factor);
+		
 	}
 	
 	p.drawTo = function(g) 
 	{
-		g.bezierCurveTo( this.c1.x, this.c1.y, this.c2.x,this.c2.y,this.p2.x,this.p2.y );
+		g.curveTo( this.c.x, this.c.y, this.p2.x,this.p2.y );
 	}
 	
 	p.drawToReverse = function(g) 
 	{
-		g.bezierCurveTo( this.c2.x, this.c2.y, this.c1.x,this.c1.y,this.p1.x,this.p1.y );
+		g.curveTo( this.c.x,this.c.y,this.p1.x,this.p1.y );
 		
 	}
 
@@ -188,8 +135,8 @@ var p = Bezier3.prototype = new qlib.GeometricShape();
 	 * @return {String} a string representation of the instance.
 	 **/
 	p.toString = function() {
-		return "Bezier3";
+		return "Bezier2";
 	}
 	
-qlib.Bezier3 = Bezier3;
+qlib.Bezier2 = Bezier2;
 }());

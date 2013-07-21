@@ -1,5 +1,5 @@
 /*
-* Circle
+* Intersection
 *
 * Copyright (c) 2013 Mario Klingemann
 * 
@@ -266,17 +266,109 @@ var p = Intersection.prototype;
 		return this;
 	};
 	
-	/*
+	p.bezier2_bezier2 = function( bz1, bz2)
+	{
+		var TOLERANCE = 1e-4;
+		
+		var a1 = bz1.p1;
+		var a2 = bz1.c;
+		var a3 = bz1.p2;
+		var b1 = bz2.p1;
+		var b2 = bz2.c;
+		var b3 = bz2.p2;
+		
+		var va, vb;
+		va = a2.getMultiply(-2);
+		var c12=a1.getPlus(va.getPlus(a3));
+		va = a1.getMultiply(-2);
+		vb = a2.getMultiply(2);
+		var c11 = va.getPlus(vb);
+		var c10 = new qlib.Vector2(a1.x,a1.y);
+		va = b2.getMultiply(-2);
+		var c22 = b1.getPlus(va.getPlus(b3));
+		va = b1.getMultiply(-2);
+		vb = b2.getMultiply(2);
+		var c21 = va.getPlus(vb);
+		var c20 = new qlib.Vector2(b1.x,b1.y);
+		
+		var a = c12.x*c11.y-c11.x*c12.y;
+		var b = c22.x*c11.y-c11.x*c22.y;
+		var c = c21.x*c11.y-c11.x*c21.y;
+		var d = c11.x*(c10.y-c20.y)+c11.y*(-c10.x+c20.x);
+		var e = c22.x*c12.y-c12.x*c22.y;
+		var f = c21.x*c12.y-c12.x*c21.y;
+		var g = c12.x*(c10.y-c20.y)+c12.y*(-c10.x+c20.x);
+		
+		var poly = new qlib.Polynomial( [-e*e,-2*e*f,a*b-f*f-2*e*g,a*c-2*f*g,a*d-g*g]);
+		var roots= poly.getRoots();
+		
+		for( var i = 0; i < roots.length;i++)
+		{
+			var s = roots[i];
+			if(0<=s&&s<=1)
+			{
+				var xRoots = new qlib.Polynomial([-c12.x,-c11.x,-c10.x+c20.x+s*c21.x+s*s*c22.x]).getRoots();
+				var yRoots = new qlib.Polynomial([-c12.y,-c11.y,-c10.y+c20.y+s*c21.y+s*s*c22.y]).getRoots();
+				if( xRoots.length > 0 && yRoots.length > 0)
+				{
+					checkRoots:
+					for(var j = 0; j < xRoots.length; j++ )
+					{
+						var xRoot = xRoots[j];
+						if( 0 <= xRoot && xRoot <= 1 )
+						{
+							for(var k=0;k<yRoots.length;k++)
+							{
+								if(Math.abs(xRoot-yRoots[k])<TOLERANCE)
+								{
+									this.appendPoint(c22.getMultiply(s*s).plus(c21.getMultiply(s).plus(c20)));
+									break checkRoots;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+
+		if ( this.points.length > 0 ) {
+			this.status = Intersection.INTERSECTION;
+		}
+		
+		return this;
+	};
+	
 	p.bezier2_bezier3 = function( bz2, bz3)
 	{
-		var c10 = bz2.p1;
-		var c11 = bz2.c;
-		var c12 = bz2.p2;
+		return this.bezier3_bezier3( new qlib.Bezier3( bz2.p1,bz2.c,bz2.c,bz2.p2), bz3 );
+	/*
+	//this code is currently broken:
+		var a1 = bz2.p1;
+		var a2 = bz2.c;
+		var a3 = bz2.p2;
 		
-		var c20 = bz3.p1;
-		var c21 = bz3.c1;
-		var c22 = bz3.c2;
-		var c23 = bz3.p2;
+		var b1 = bz3.p1;
+		var b2 = bz3.c1;
+		var b3 = bz3.c2;
+		var b4 = bz3.p2;
+		
+		var a = a2.getMultiply(-2);
+		var c12 = a1.getPlus(a.plus(a3));
+		var c10 = a1.getMultiply(-2);
+		var b = a2.getMultiply(2);
+		var c11 = a.plus(b);
+		a = b1.getMultiply(-1);
+		b = b2.getMultiply(3);
+		var c = b3.getMultiply(-3);
+		var c23 = a.plus( b.plus(c.plus(b4)));
+		a=b1.getMultiply(3);
+		b=b2.getMultiply(-6);
+		c=b3.getMultiply(3);
+		var c22= a.plus(b.plus(c));
+		a=b1.getMultiply(-3);
+		var c20=b2.getMultiply(3);
+		var c21=a.plus(b);
 		
 		var c10x2 = c10.x*c10.x;
 		var c10y2 = c10.y*c10.y;
@@ -303,16 +395,16 @@ var p = Intersection.prototype;
 			if (xRoots.length>0 && yRoots.length>0) 
 			{
 				//checkRoots:
-				for (var j = 0; j<xRoots.length; j++) 
+				for (var j = 0; j< xRoots.length; j++) 
 				{
 					var xRoot = xRoots[j];
-					if (0<=xRoot && xRoot<=1) 
+					if ( 0 <= xRoot && xRoot <= 1) 
 					{
-						for (var k = 0; k<yRoots.length; k++) 
+						for (var k = 0; k < yRoots.length; k++) 
 						{
 							if (Math.abs(xRoot-yRoots[k])<TOLERANCE) 
 							{
-								this.appendPoint(c23.getMultiply(s*s*s).plus(c22.multiply(s*s).plus(c21.multiply(s).plus(c20))));
+								this.appendPoint(c23.getMultiply(s*s*s).plus(c22.getMultiply(s*s).plus(c21.getMultiply(s).plus(c20))));
 								break;
 								//checkRoots;
 							}
@@ -326,8 +418,9 @@ var p = Intersection.prototype;
 			this.status = Intersection.INTERSECTION;
 		}
 		return this;
+		*/
 	};
-	*/
+	
 	p.bezier3_bezier3 = function( bz1, bz2)
 	{
 		var a1 = bz1.p1;

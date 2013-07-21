@@ -222,6 +222,77 @@ var p = Vector2.prototype;
 		return new qlib.Vector2( this.x / d, this.y / d );
 	}
 	
+	p.getAddCartesian = function( angle, length )
+	{
+		return new qlib.Vector2 (this.x + Math.cos ( angle ) * length, this.y + Math.sin ( angle ) * length );
+	}
+	
+	p.addCartesian = function( angle, length )
+	{
+		this.x += Math.cos ( angle ) * length;
+		this.y += Math.sin ( angle ) * length;
+		return this;
+	}
+	
+	p.getAngle = function( )
+	{
+		return Math.atan2( this.y , this.x );
+	}
+	
+	p.getAngleTo= function( v )
+	{
+		return Math.atan2( v.y - this.y, v.x - this.x );
+	};
+	
+	p.dot= function( v )
+	{
+		return this.x * v.x + this.y * v.y;
+	}
+	
+	p.cross = function( v )
+	{
+		return this.x * v.y - this.y * v.x;
+	}
+		
+	p.angleBetween = function( v )
+	{
+		return Math.acos ( this.dot( v ) / ( this.getLength() * v.getLength() ) );
+	}
+	
+	p.cornerAngle = function( v1, v2 )
+	{
+		return v1.getMinus(this).angleBetween( v2.getMinus(this) );
+	}
+	
+	
+	p.getProject = function( a, b )
+	{
+		
+		// upgraded version by Fabien  Bizot 
+		// http://www.lafabrick.com/blog
+		var len = a.distanceToVector( b );
+		var r = (((a.y - this.y) * (a.y - b.y)) - ((a.x - this.x) * (b.x - a.x))) / (len * len);
+		
+		var px = a.x + r * (b.x - a.x);
+		var py = a.y + r * (b.y - a.y);
+		
+		return new qlib.Vector2(px, py);
+	}
+	
+	p.project = function( a, b )
+	{
+		
+		// upgraded version by Fabien  Bizot 
+		// http://www.lafabrick.com/blog
+		var len = a.distanceToVector( b );
+		var r = (((a.y - this.y) * (a.y - b.y)) - ((a.x - this.x) * (b.x - a.x))) / (len * len);
+		
+		this.x = a.x + r * (b.x - a.x);
+		this.y = a.y + r * (b.y - a.y);
+		
+		return this;
+	}
+	
 	
 	/**
 	 * Returns a clone of the Vector2 instance.
@@ -254,6 +325,7 @@ var p = Vector2.prototype;
 		radius = ( radius == null ? 2 : radius );
 		g.drawRect(this.x-radius,this.y-radius,radius+radius,radius+radius);
 	}
+	
 	
 	/**
 	 * Returns a string representation of this object.

@@ -120,7 +120,56 @@ this.qlib = this.qlib||{};
 			canvas.lineTo(this.c.x, this.c.y);
 		}
 	}
+	
+	p.getBoundingRect = function()
+	{
+		return new qlib.Rectangle( this.c.x - this.r, this.c.y - this.r,this.r*2,this.r*2);
+	}
 
+	
+	//http://mathworld.wolfram.com/Polar.html
+	/**
+	 * returns the inverse Vector2 of the orthoProjection of the center of the circle onto the pole
+	 * @param	p0
+	 * @param	p1
+	 * @return
+	 */
+	p.inversionPointFromPole = function( p0, p1 )
+	{
+		
+		var ip = this.c.getProject( p0, p1 );
+		if ( this.containsPoint( ip ) )return ip;
+		return this.inversionPoint( ip );
+	}
+	
+	
+	//http://mathworld.wolfram.com/Inversion.html
+	/**
+	 * find the inverse Vector2 of a Vector2 onto the circle
+	 * @param	p
+	 * @return
+	 */
+	p.inversionPoint = function( p )
+	{
+		var s = this.c.distanceToVector( p );
+		var a = this.c.getAngleTo( p );
+		var radius = ( this.r * this.r ) / s;
+		
+		return new qlib.Vector2( this.c.x + Math.cos( a ) * radius,
+								 this.c.y + Math.sin( a ) * radius	);
+	}
+	
+	/**
+	 * returns a true if the Vector2 is incside the circle, false otherwise
+	 * @param	p	
+	 * @return
+	 */
+	p.containsPoint = function( p )
+	{
+		return this.c.squaredDistanceToVector( p ) < this.r * this.r;
+	}
+		
+	
 	/**
 	 * Returns a string representation of this object.
 	 * @method toString
