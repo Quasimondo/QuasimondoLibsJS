@@ -266,6 +266,236 @@ var p = Intersection.prototype;
 		return this;
 	};
 	
+	/*
+	p.bezier2_bezier3 = function( bz2, bz3)
+	{
+		var c10 = bz2.p1;
+		var c11 = bz2.c;
+		var c12 = bz2.p2;
+		
+		var c20 = bz3.p1;
+		var c21 = bz3.c1;
+		var c22 = bz3.c2;
+		var c23 = bz3.p2;
+		
+		var c10x2 = c10.x*c10.x;
+		var c10y2 = c10.y*c10.y;
+		var c11x2 = c11.x*c11.x;
+		var c11y2 = c11.y*c11.y;
+		var c12x2 = c12.x*c12.x;
+		var c12y2 = c12.y*c12.y;
+		var c20x2 = c20.x*c20.x;
+		var c20y2 = c20.y*c20.y;
+		var c21x2 = c21.x*c21.x;
+		var c21y2 = c21.y*c21.y;
+		var c22x2 = c22.x*c22.x;
+		var c22y2 = c22.y*c22.y;
+		var c23x2 = c23.x*c23.x;
+		var c23y2 = c23.y*c23.y;
+		var poly = new qlib.Polynomial([-2*c12.x*c12.y*c23.x*c23.y+c12x2*c23y2+c12y2*c23x2, -2*c12.x*c12.y*c22.x*c23.y-2*c12.x*c12.y*c22.y*c23.x+2*c12y2*c22.x*c23.x+2*c12x2*c22.y*c23.y, -2*c12.x*c21.x*c12.y*c23.y-2*c12.x*c12.y*c21.y*c23.x-2*c12.x*c12.y*c22.x*c22.y+2*c21.x*c12y2*c23.x+c12y2*c22x2+c12x2*(2*c21.y*c23.y+c22y2), 2*c10.x*c12.x*c12.y*c23.y+2*c10.y*c12.x*c12.y*c23.x+c11.x*c11.y*c12.x*c23.y+c11.x*c11.y*c12.y*c23.x-2*c20.x*c12.x*c12.y*c23.y-2*c12.x*c20.y*c12.y*c23.x-2*c12.x*c21.x*c12.y*c22.y-2*c12.x*c12.y*c21.y*c22.x-2*c10.x*c12y2*c23.x-2*c10.y*c12x2*c23.y+2*c20.x*c12y2*c23.x+2*c21.x*c12y2*c22.x-c11y2*c12.x*c23.x-c11x2*c12.y*c23.y+c12x2*(2*c20.y*c23.y+2*c21.y*c22.y), 2*c10.x*c12.x*c12.y*c22.y+2*c10.y*c12.x*c12.y*c22.x+c11.x*c11.y*c12.x*c22.y+c11.x*c11.y*c12.y*c22.x-2*c20.x*c12.x*c12.y*c22.y-2*c12.x*c20.y*c12.y*c22.x-2*c12.x*c21.x*c12.y*c21.y-2*c10.x*c12y2*c22.x-2*c10.y*c12x2*c22.y+2*c20.x*c12y2*c22.x-c11y2*c12.x*c22.x-c11x2*c12.y*c22.y+c21x2*c12y2+c12x2*(2*c20.y*c22.y+c21y2), 2*c10.x*c12.x*c12.y*c21.y+2*c10.y*c12.x*c21.x*c12.y+c11.x*c11.y*c12.x*c21.y+c11.x*c11.y*c21.x*c12.y-2*c20.x*c12.x*c12.y*c21.y-2*c12.x*c20.y*c21.x*c12.y-2*c10.x*c21.x*c12y2-2*c10.y*c12x2*c21.y+2*c20.x*c21.x*c12y2-c11y2*c12.x*c21.x-c11x2*c12.y*c21.y+2*c12x2*c20.y*c21.y, -2*c10.x*c10.y*c12.x*c12.y-c10.x*c11.x*c11.y*c12.y-c10.y*c11.x*c11.y*c12.x+2*c10.x*c12.x*c20.y*c12.y+2*c10.y*c20.x*c12.x*c12.y+c11.x*c20.x*c11.y*c12.y+c11.x*c11.y*c12.x*c20.y-2*c20.x*c12.x*c20.y*c12.y-2*c10.x*c20.x*c12y2+c10.x*c11y2*c12.x+c10.y*c11x2*c12.y-2*c10.y*c12x2*c20.y-c20.x*c11y2*c12.x-c11x2*c20.y*c12.y+c10x2*c12y2+c10y2*c12x2+c20x2*c12y2+c12x2*c20y2]);
+		var roots = poly.getRootsInInterval(0, 1);
+		var TOLERANCE = 1e-4;
+		for (var i = 0; i < roots.length; i++) 
+		{
+			var s = roots[i];
+			var xRoots = new qlib.Polynomial([c12.x, c11.x, c10.x-c20.x-s*c21.x-s*s*c22.x-s*s*s*c23.x]).getRoots();
+			var yRoots = new qlib.Polynomial([c12.y, c11.y, c10.y-c20.y-s*c21.y-s*s*c22.y-s*s*s*c23.y]).getRoots();
+			if (xRoots.length>0 && yRoots.length>0) 
+			{
+				//checkRoots:
+				for (var j = 0; j<xRoots.length; j++) 
+				{
+					var xRoot = xRoots[j];
+					if (0<=xRoot && xRoot<=1) 
+					{
+						for (var k = 0; k<yRoots.length; k++) 
+						{
+							if (Math.abs(xRoot-yRoots[k])<TOLERANCE) 
+							{
+								this.appendPoint(c23.getMultiply(s*s*s).plus(c22.multiply(s*s).plus(c21.multiply(s).plus(c20))));
+								break;
+								//checkRoots;
+							}
+						}
+					}
+				}
+			}
+		}
+		if ( this.points.length>0) 
+		{
+			this.status = Intersection.INTERSECTION;
+		}
+		return this;
+	};
+	*/
+	p.bezier3_bezier3 = function( bz1, bz2)
+	{
+		var a1 = bz1.p1;
+		var a2 = bz1.c1;
+		var a3 = bz1.c2;
+		var a4 = bz1.p2;
+		var b1 = bz2.p1;
+		var b2 = bz2.c1;
+		var b3 = bz2.c2;
+		var b4 = bz2.p2;
+		
+		var ax,bx,cx,dx;
+		var c13x,c12x,c11x,c10x;
+		var c23x,c22x,c21x,c20x;
+		
+		var ay,by,cy,dy;
+		var c13y,c12y,c11y,c10y;
+		var c23y,c22y,c21y,c20y;
+		
+		ax = -a1.x;
+		bx = 3 * a2.x;
+		cx = -3 * a3.x;
+		c13x = ax + bx + cx + a4.x;
+		
+		ay = -a1.y;
+		by = 3 * a2.y;
+		cy = -3 * a3.y;
+		c13y = ay + by + cy + a4.y;
+		
+		ax = 3 * a1.x;
+		bx = -6 * a2.x;
+		cx = 3 * a3.x;
+		c12x = ax + bx + cx;
+		
+		ay = 3 * a1.y;
+		by = -6 * a2.y;
+		cy = 3 * a3.y;
+		c12y = ay + by + cy;
+		
+		ax = -3 * a1.x;
+		bx = 3 * a2.x;
+		c11x =  ax + bx;
+		c10x =  a1.x;
+		
+		ay = -3 * a1.y;
+		by = 3 * a2.y;
+		c11y = ay + by;
+		c10y =  a1.y;
+		
+		ax = -b1.x;
+		bx = 3 * b2.x;
+		cx = -3 * b3.x;
+		c23x = ax + bx + cx + b4.x;
+		
+		ay = -b1.y;
+		by = 3 * b2.y;
+		cy = -3 * b3.y;
+		c23y = ay + by + cy + b4.y;
+		
+		ax = 3 * b1.x;
+		bx = -6 * b2.x;
+		cx = 3 * b3.x;
+		c22x = ax + bx + cx;
+		
+		ay = 3 * b1.y;
+		by = -6 * b2.y;
+		cy = 3 * b3.y;
+		c22y = ay + by + cy;
+		
+		ax = -3 * b1.x;
+		bx = 3 * b2.x;
+		c21x =  ax + bx;
+		c20x = b1.x;
+		
+		ay = -3 * b1.y;
+		by = 3 * b2.y;
+		c21y = ay + by;
+		c20y = b1.y;
+		
+		
+		var c10x2=c10x*c10x;
+		var c10x3=c10x*c10x*c10x;
+		var c10y2=c10y*c10y;
+		var c10y3=c10y*c10y*c10y;
+		var c11x2=c11x*c11x;
+		var c11x3=c11x*c11x*c11x;
+		var c11y2=c11y*c11y;
+		var c11y3=c11y*c11y*c11y;
+		var c12x2=c12x*c12x;
+		var c12x3=c12x*c12x*c12x;
+		var c12y2=c12y*c12y;
+		var c12y3=c12y*c12y*c12y;
+		var c13x2=c13x*c13x;
+		var c13x3=c13x*c13x*c13x;
+		var c13y2=c13y*c13y;
+		var c13y3=c13y*c13y*c13y;
+		var c20x2=c20x*c20x;
+		var c20x3=c20x*c20x*c20x;
+		var c20y2=c20y*c20y;
+		var c20y3=c20y*c20y*c20y;
+		var c21x2=c21x*c21x;
+		var c21x3=c21x*c21x*c21x;
+		var c21y2=c21y*c21y;
+		var c22x2=c22x*c22x;
+		var c22x3=c22x*c22x*c22x;
+		var c22y2=c22y*c22y;
+		var c23x2=c23x*c23x;
+		var c23x3=c23x*c23x*c23x;
+		var c23y2=c23y*c23y;
+		var c23y3=c23y*c23y*c23y;
+		
+		var poly= new qlib.Polynomial([
+				-c13x3*c23y3+c13y3*c23x3-3*c13x*c13y2*c23x2*c23y+3*c13x2*c13y*c23x*c23y2,
+				-6*c13x*c22x*c13y2*c23x*c23y+6*c13x2*c13y*c22y*c23x*c23y+3*c22x*c13y3*c23x2-3*c13x3*c22y*c23y2-3*c13x*c13y2*c22y*c23x2+3*c13x2*c22x*c13y*c23y2,
+				-6*c21x*c13x*c13y2*c23x*c23y-6*c13x*c22x*c13y2*c22y*c23x+6*c13x2*c22x*c13y*c22y*c23y+3*c21x*c13y3*c23x2+3*c22x2*c13y3*c23x+3*c21x*c13x2*c13y*c23y2-3*c13x*c21y*c13y2*c23x2-3*c13x*c22x2*c13y2*c23y+c13x2*c13y*c23x*(6*c21y*c23y+3*c22y2)+c13x3*(-c21y*c23y2-2*c22y2*c23y-c23y*(2*c21y*c23y+c22y2)),
+				c11x*c12y*c13x*c13y*c23x*c23y-c11y*c12x*c13x*c13y*c23x*c23y+6*c21x*c22x*c13y3*c23x+3*c11x*c12x*c13x*c13y*c23y2+6*c10x*c13x*c13y2*c23x*c23y-3*c11x*c12x*c13y2*c23x*c23y-3*c11y*c12y*c13x*c13y*c23x2-6*c10y*c13x2*c13y*c23x*c23y-6*c20x*c13x*c13y2*c23x*c23y+3*c11y*c12y*c13x2*c23x*c23y-2*c12x*c12y2*c13x*c23x*c23y-6*c21x*c13x*c22x*c13y2*c23y-6*c21x*c13x*c13y2*c22y*c23x-6*c13x*c21y*c22x*c13y2*c23x+6*c21x*c13x2*c13y*c22y*c23y+2*c12x2*c12y*c13y*c23x*c23y+c22x3*c13y3-3*c10x*c13y3*c23x2+3*c10y*c13x3*c23y2+3*c20x*c13y3*c23x2+c12y3*c13x*c23x2-c12x3*c13y*c23y2-3*c10x*c13x2*c13y*c23y2+3*c10y*c13x*c13y2*c23x2-2*c11x*c12y*c13x2*c23y2+c11x*c12y*c13y2*c23x2-c11y*c12x*c13x2*c23y2+2*c11y*c12x*c13y2*c23x2+3*c20x*c13x2*c13y*c23y2-c12x*c12y2*c13y*c23x2-3*c20y*c13x*c13y2*c23x2+c12x2*c12y*c13x*c23y2-3*c13x*c22x2*c13y2*c22y+c13x2*c13y*c23x*(6*c20y*c23y+6*c21y*c22y)+c13x2*c22x*c13y*(6*c21y*c23y+3*c22y2)+c13x3*(-2*c21y*c22y*c23y-c20y*c23y2-c22y*(2*c21y*c23y+c22y2)-c23y*(2*c20y*c23y+2*c21y*c22y)),
+				6*c11x*c12x*c13x*c13y*c22y*c23y+c11x*c12y*c13x*c22x*c13y*c23y+c11x*c12y*c13x*c13y*c22y*c23x-c11y*c12x*c13x*c22x*c13y*c23y-c11y*c12x*c13x*c13y*c22y*c23x-6*c11y*c12y*c13x*c22x*c13y*c23x-6*c10x*c22x*c13y3*c23x+6*c20x*c22x*c13y3*c23x+6*c10y*c13x3*c22y*c23y+2*c12y3*c13x*c22x*c23x-2*c12x3*c13y*c22y*c23y+6*c10x*c13x*c22x*c13y2*c23y+6*c10x*c13x*c13y2*c22y*c23x+6*c10y*c13x*c22x*c13y2*c23x-3*c11x*c12x*c22x*c13y2*c23y-3*c11x*c12x*c13y2*c22y*c23x+2*c11x*c12y*c22x*c13y2*c23x+4*c11y*c12x*c22x*c13y2*c23x-6*c10x*c13x2*c13y*c22y*c23y-6*c10y*c13x2*c22x*c13y*c23y-6*c10y*c13x2*c13y*c22y*c23x-4*c11x*c12y*c13x2*c22y*c23y-6*c20x*c13x*c22x*c13y2*c23y-6*c20x*c13x*c13y2*c22y*c23x-2*c11y*c12x*c13x2*c22y*c23y+3*c11y*c12y*c13x2*c22x*c23y+3*c11y*c12y*c13x2*c22y*c23x-2*c12x*c12y2*c13x*c22x*c23y-2*c12x*c12y2*c13x*c22y*c23x-2*c12x*c12y2*c22x*c13y*c23x-6*c20y*c13x*c22x*c13y2*c23x-6*c21x*c13x*c21y*c13y2*c23x-6*c21x*c13x*c22x*c13y2*c22y+6*c20x*c13x2*c13y*c22y*c23y+2*c12x2*c12y*c13x*c22y*c23y+2*c12x2*c12y*c22x*c13y*c23y+2*c12x2*c12y*c13y*c22y*c23x+3*c21x*c22x2*c13y3+3*c21x2*c13y3*c23x-3*c13x*c21y*c22x2*c13y2-3*c21x2*c13x*c13y2*c23y+c13x2*c22x*c13y*(6*c20y*c23y+6*c21y*c22y)+c13x2*c13y*c23x*(6*c20y*c22y+3*c21y2)+c21x*c13x2*c13y*(6*c21y*c23y+3*c22y2)+c13x3*(-2*c20y*c22y*c23y-c23y*(2*c20y*c22y+c21y2)-c21y*(2*c21y*c23y+c22y2)-c22y*(2*c20y*c23y+2*c21y*c22y)),
+				c11x*c21x*c12y*c13x*c13y*c23y+c11x*c12y*c13x*c21y*c13y*c23x+c11x*c12y*c13x*c22x*c13y*c22y-c11y*c12x*c21x*c13x*c13y*c23y-c11y*c12x*c13x*c21y*c13y*c23x-c11y*c12x*c13x*c22x*c13y*c22y-6*c11y*c21x*c12y*c13x*c13y*c23x-6*c10x*c21x*c13y3*c23x+6*c20x*c21x*c13y3*c23x+2*c21x*c12y3*c13x*c23x+6*c10x*c21x*c13x*c13y2*c23y+6*c10x*c13x*c21y*c13y2*c23x+6*c10x*c13x*c22x*c13y2*c22y+6*c10y*c21x*c13x*c13y2*c23x-3*c11x*c12x*c21x*c13y2*c23y-3*c11x*c12x*c21y*c13y2*c23x-3*c11x*c12x*c22x*c13y2*c22y+2*c11x*c21x*c12y*c13y2*c23x+4*c11y*c12x*c21x*c13y2*c23x-6*c10y*c21x*c13x2*c13y*c23y-6*c10y*c13x2*c21y*c13y*c23x-6*c10y*c13x2*c22x*c13y*c22y-6*c20x*c21x*c13x*c13y2*c23y-6*c20x*c13x*c21y*c13y2*c23x-6*c20x*c13x*c22x*c13y2*c22y+3*c11y*c21x*c12y*c13x2*c23y-3*c11y*c12y*c13x*c22x2*c13y+3*c11y*c12y*c13x2*c21y*c23x+3*c11y*c12y*c13x2*c22x*c22y-2*c12x*c21x*c12y2*c13x*c23y-2*c12x*c21x*c12y2*c13y*c23x-2*c12x*c12y2*c13x*c21y*c23x-2*c12x*c12y2*c13x*c22x*c22y-6*c20y*c21x*c13x*c13y2*c23x-6*c21x*c13x*c21y*c22x*c13y2+6*c20y*c13x2*c21y*c13y*c23x+2*c12x2*c21x*c12y*c13y*c23y+2*c12x2*c12y*c21y*c13y*c23x+2*c12x2*c12y*c22x*c13y*c22y-3*c10x*c22x2*c13y3+3*c20x*c22x2*c13y3+3*c21x2*c22x*c13y3+c12y3*c13x*c22x2+3*c10y*c13x*c22x2*c13y2+c11x*c12y*c22x2*c13y2+2*c11y*c12x*c22x2*c13y2-c12x*c12y2*c22x2*c13y-3*c20y*c13x*c22x2*c13y2-3*c21x2*c13x*c13y2*c22y+c12x2*c12y*c13x*(2*c21y*c23y+c22y2)+c11x*c12x*c13x*c13y*(6*c21y*c23y+3*c22y2)+c21x*c13x2*c13y*(6*c20y*c23y+6*c21y*c22y)+c12x3*c13y*(-2*c21y*c23y-c22y2)+c10y*c13x3*(6*c21y*c23y+3*c22y2)+c11y*c12x*c13x2*(-2*c21y*c23y-c22y2)+c11x*c12y*c13x2*(-4*c21y*c23y-2*c22y2)+c10x*c13x2*c13y*(-6*c21y*c23y-3*c22y2)+c13x2*c22x*c13y*(6*c20y*c22y+3*c21y2)+c20x*c13x2*c13y*(6*c21y*c23y+3*c22y2)+c13x3*(-2*c20y*c21y*c23y-c22y*(2*c20y*c22y+c21y2)-c20y*(2*c21y*c23y+c22y2)-c21y*(2*c20y*c23y+2*c21y*c22y)),
+				-c10x*c11x*c12y*c13x*c13y*c23y+c10x*c11y*c12x*c13x*c13y*c23y+6*c10x*c11y*c12y*c13x*c13y*c23x-6*c10y*c11x*c12x*c13x*c13y*c23y-c10y*c11x*c12y*c13x*c13y*c23x+c10y*c11y*c12x*c13x*c13y*c23x+c11x*c11y*c12x*c12y*c13x*c23y-c11x*c11y*c12x*c12y*c13y*c23x+c11x*c20x*c12y*c13x*c13y*c23y+c11x*c20y*c12y*c13x*c13y*c23x+c11x*c21x*c12y*c13x*c13y*c22y+c11x*c12y*c13x*c21y*c22x*c13y-c20x*c11y*c12x*c13x*c13y*c23y-6*c20x*c11y*c12y*c13x*c13y*c23x-c11y*c12x*c20y*c13x*c13y*c23x-c11y*c12x*c21x*c13x*c13y*c22y-c11y*c12x*c13x*c21y*c22x*c13y-6*c11y*c21x*c12y*c13x*c22x*c13y-6*c10x*c20x*c13y3*c23x-6*c10x*c21x*c22x*c13y3-2*c10x*c12y3*c13x*c23x+6*c20x*c21x*c22x*c13y3+2*c20x*c12y3*c13x*c23x+2*c21x*c12y3*c13x*c22x+2*c10y*c12x3*c13y*c23y-6*c10x*c10y*c13x*c13y2*c23x+3*c10x*c11x*c12x*c13y2*c23y-2*c10x*c11x*c12y*c13y2*c23x-4*c10x*c11y*c12x*c13y2*c23x+3*c10y*c11x*c12x*c13y2*c23x+6*c10x*c10y*c13x2*c13y*c23y+6*c10x*c20x*c13x*c13y2*c23y-3*c10x*c11y*c12y*c13x2*c23y+2*c10x*c12x*c12y2*c13x*c23y+2*c10x*c12x*c12y2*c13y*c23x+6*c10x*c20y*c13x*c13y2*c23x+6*c10x*c21x*c13x*c13y2*c22y+6*c10x*c13x*c21y*c22x*c13y2+4*c10y*c11x*c12y*c13x2*c23y+6*c10y*c20x*c13x*c13y2*c23x+2*c10y*c11y*c12x*c13x2*c23y-3*c10y*c11y*c12y*c13x2*c23x+2*c10y*c12x*c12y2*c13x*c23x+6*c10y*c21x*c13x*c22x*c13y2-3*c11x*c20x*c12x*c13y2*c23y+2*c11x*c20x*c12y*c13y2*c23x+c11x*c11y*c12y2*c13x*c23x-3*c11x*c12x*c20y*c13y2*c23x-3*c11x*c12x*c21x*c13y2*c22y-3*c11x*c12x*c21y*c22x*c13y2+2*c11x*c21x*c12y*c22x*c13y2+4*c20x*c11y*c12x*c13y2*c23x+4*c11y*c12x*c21x*c22x*c13y2-2*c10x*c12x2*c12y*c13y*c23y-6*c10y*c20x*c13x2*c13y*c23y-6*c10y*c20y*c13x2*c13y*c23x-6*c10y*c21x*c13x2*c13y*c22y-2*c10y*c12x2*c12y*c13x*c23y-2*c10y*c12x2*c12y*c13y*c23x-6*c10y*c13x2*c21y*c22x*c13y-c11x*c11y*c12x2*c13y*c23y-2*c11x*c11y2*c13x*c13y*c23x+3*c20x*c11y*c12y*c13x2*c23y-2*c20x*c12x*c12y2*c13x*c23y-2*c20x*c12x*c12y2*c13y*c23x-6*c20x*c20y*c13x*c13y2*c23x-6*c20x*c21x*c13x*c13y2*c22y-6*c20x*c13x*c21y*c22x*c13y2+3*c11y*c20y*c12y*c13x2*c23x+3*c11y*c21x*c12y*c13x2*c22y+3*c11y*c12y*c13x2*c21y*c22x-2*c12x*c20y*c12y2*c13x*c23x-2*c12x*c21x*c12y2*c13x*c22y-2*c12x*c21x*c12y2*c22x*c13y-2*c12x*c12y2*c13x*c21y*c22x-6*c20y*c21x*c13x*c22x*c13y2-c11y2*c12x*c12y*c13x*c23x+2*c20x*c12x2*c12y*c13y*c23y+6*c20y*c13x2*c21y*c22x*c13y+2*c11x2*c11y*c13x*c13y*c23y+c11x2*c12x*c12y*c13y*c23y+2*c12x2*c20y*c12y*c13y*c23x+2*c12x2*c21x*c12y*c13y*c22y+2*c12x2*c12y*c21y*c22x*c13y+c21x3*c13y3+3*c10x2*c13y3*c23x-3*c10y2*c13x3*c23y+3*c20x2*c13y3*c23x+c11y3*c13x2*c23x-c11x3*c13y2*c23y-c11x*c11y2*c13x2*c23y+c11x2*c11y*c13y2*c23x-3*c10x2*c13x*c13y2*c23y+3*c10y2*c13x2*c13y*c23x-c11x2*c12y2*c13x*c23y+c11y2*c12x2*c13y*c23x-3*c21x2*c13x*c21y*c13y2-3*c20x2*c13x*c13y2*c23y+3*c20y2*c13x2*c13y*c23x+c11x*c12x*c13x*c13y*(6*c20y*c23y+6*c21y*c22y)+c12x3*c13y*(-2*c20y*c23y-2*c21y*c22y)+c10y*c13x3*(6*c20y*c23y+6*c21y*c22y)+c11y*c12x*c13x2*(-2*c20y*c23y-2*c21y*c22y)+c12x2*c12y*c13x*(2*c20y*c23y+2*c21y*c22y)+c11x*c12y*c13x2*(-4*c20y*c23y-4*c21y*c22y)+c10x*c13x2*c13y*(-6*c20y*c23y-6*c21y*c22y)+c20x*c13x2*c13y*(6*c20y*c23y+6*c21y*c22y)+c21x*c13x2*c13y*(6*c20y*c22y+3*c21y2)+c13x3*(-2*c20y*c21y*c22y-c20y2*c23y-c21y*(2*c20y*c22y+c21y2)-c20y*(2*c20y*c23y+2*c21y*c22y)),
+				-c10x*c11x*c12y*c13x*c13y*c22y+c10x*c11y*c12x*c13x*c13y*c22y+6*c10x*c11y*c12y*c13x*c22x*c13y-6*c10y*c11x*c12x*c13x*c13y*c22y-c10y*c11x*c12y*c13x*c22x*c13y+c10y*c11y*c12x*c13x*c22x*c13y+c11x*c11y*c12x*c12y*c13x*c22y-c11x*c11y*c12x*c12y*c22x*c13y+c11x*c20x*c12y*c13x*c13y*c22y+c11x*c20y*c12y*c13x*c22x*c13y+c11x*c21x*c12y*c13x*c21y*c13y-c20x*c11y*c12x*c13x*c13y*c22y-6*c20x*c11y*c12y*c13x*c22x*c13y-c11y*c12x*c20y*c13x*c22x*c13y-c11y*c12x*c21x*c13x*c21y*c13y-6*c10x*c20x*c22x*c13y3-2*c10x*c12y3*c13x*c22x+2*c20x*c12y3*c13x*c22x+2*c10y*c12x3*c13y*c22y-6*c10x*c10y*c13x*c22x*c13y2+3*c10x*c11x*c12x*c13y2*c22y-2*c10x*c11x*c12y*c22x*c13y2-4*c10x*c11y*c12x*c22x*c13y2+3*c10y*c11x*c12x*c22x*c13y2+6*c10x*c10y*c13x2*c13y*c22y+6*c10x*c20x*c13x*c13y2*c22y-3*c10x*c11y*c12y*c13x2*c22y+2*c10x*c12x*c12y2*c13x*c22y+2*c10x*c12x*c12y2*c22x*c13y+6*c10x*c20y*c13x*c22x*c13y2+6*c10x*c21x*c13x*c21y*c13y2+4*c10y*c11x*c12y*c13x2*c22y+6*c10y*c20x*c13x*c22x*c13y2+2*c10y*c11y*c12x*c13x2*c22y-3*c10y*c11y*c12y*c13x2*c22x+2*c10y*c12x*c12y2*c13x*c22x-3*c11x*c20x*c12x*c13y2*c22y+2*c11x*c20x*c12y*c22x*c13y2+c11x*c11y*c12y2*c13x*c22x-3*c11x*c12x*c20y*c22x*c13y2-3*c11x*c12x*c21x*c21y*c13y2+4*c20x*c11y*c12x*c22x*c13y2-2*c10x*c12x2*c12y*c13y*c22y-6*c10y*c20x*c13x2*c13y*c22y-6*c10y*c20y*c13x2*c22x*c13y-6*c10y*c21x*c13x2*c21y*c13y-2*c10y*c12x2*c12y*c13x*c22y-2*c10y*c12x2*c12y*c22x*c13y-c11x*c11y*c12x2*c13y*c22y-2*c11x*c11y2*c13x*c22x*c13y+3*c20x*c11y*c12y*c13x2*c22y-2*c20x*c12x*c12y2*c13x*c22y-2*c20x*c12x*c12y2*c22x*c13y-6*c20x*c20y*c13x*c22x*c13y2-6*c20x*c21x*c13x*c21y*c13y2+3*c11y*c20y*c12y*c13x2*c22x+3*c11y*c21x*c12y*c13x2*c21y-2*c12x*c20y*c12y2*c13x*c22x-2*c12x*c21x*c12y2*c13x*c21y-c11y2*c12x*c12y*c13x*c22x+2*c20x*c12x2*c12y*c13y*c22y-3*c11y*c21x2*c12y*c13x*c13y+6*c20y*c21x*c13x2*c21y*c13y+2*c11x2*c11y*c13x*c13y*c22y+c11x2*c12x*c12y*c13y*c22y+2*c12x2*c20y*c12y*c22x*c13y+2*c12x2*c21x*c12y*c21y*c13y-3*c10x*c21x2*c13y3+3*c20x*c21x2*c13y3+3*c10x2*c22x*c13y3-3*c10y2*c13x3*c22y+3*c20x2*c22x*c13y3+c21x2*c12y3*c13x+c11y3*c13x2*c22x-c11x3*c13y2*c22y+3*c10y*c21x2*c13x*c13y2-c11x*c11y2*c13x2*c22y+c11x*c21x2*c12y*c13y2+2*c11y*c12x*c21x2*c13y2+c11x2*c11y*c22x*c13y2-c12x*c21x2*c12y2*c13y-3*c20y*c21x2*c13x*c13y2-3*c10x2*c13x*c13y2*c22y+3*c10y2*c13x2*c22x*c13y-c11x2*c12y2*c13x*c22y+c11y2*c12x2*c22x*c13y-3*c20x2*c13x*c13y2*c22y+3*c20y2*c13x2*c22x*c13y+c12x2*c12y*c13x*(2*c20y*c22y+c21y2)+c11x*c12x*c13x*c13y*(6*c20y*c22y+3*c21y2)+c12x3*c13y*(-2*c20y*c22y-c21y2)+c10y*c13x3*(6*c20y*c22y+3*c21y2)+c11y*c12x*c13x2*(-2*c20y*c22y-c21y2)+c11x*c12y*c13x2*(-4*c20y*c22y-2*c21y2)+c10x*c13x2*c13y*(-6*c20y*c22y-3*c21y2)+c20x*c13x2*c13y*(6*c20y*c22y+3*c21y2)+c13x3*(-2*c20y*c21y2-c20y2*c22y-c20y*(2*c20y*c22y+c21y2)),
+				-c10x*c11x*c12y*c13x*c21y*c13y+c10x*c11y*c12x*c13x*c21y*c13y+6*c10x*c11y*c21x*c12y*c13x*c13y-6*c10y*c11x*c12x*c13x*c21y*c13y-c10y*c11x*c21x*c12y*c13x*c13y+c10y*c11y*c12x*c21x*c13x*c13y-c11x*c11y*c12x*c21x*c12y*c13y+c11x*c11y*c12x*c12y*c13x*c21y+c11x*c20x*c12y*c13x*c21y*c13y+6*c11x*c12x*c20y*c13x*c21y*c13y+c11x*c20y*c21x*c12y*c13x*c13y-c20x*c11y*c12x*c13x*c21y*c13y-6*c20x*c11y*c21x*c12y*c13x*c13y-c11y*c12x*c20y*c21x*c13x*c13y-6*c10x*c20x*c21x*c13y3-2*c10x*c21x*c12y3*c13x+6*c10y*c20y*c13x3*c21y+2*c20x*c21x*c12y3*c13x+2*c10y*c12x3*c21y*c13y-2*c12x3*c20y*c21y*c13y-6*c10x*c10y*c21x*c13x*c13y2+3*c10x*c11x*c12x*c21y*c13y2-2*c10x*c11x*c21x*c12y*c13y2-4*c10x*c11y*c12x*c21x*c13y2+3*c10y*c11x*c12x*c21x*c13y2+6*c10x*c10y*c13x2*c21y*c13y+6*c10x*c20x*c13x*c21y*c13y2-3*c10x*c11y*c12y*c13x2*c21y+2*c10x*c12x*c21x*c12y2*c13y+2*c10x*c12x*c12y2*c13x*c21y+6*c10x*c20y*c21x*c13x*c13y2+4*c10y*c11x*c12y*c13x2*c21y+6*c10y*c20x*c21x*c13x*c13y2+2*c10y*c11y*c12x*c13x2*c21y-3*c10y*c11y*c21x*c12y*c13x2+2*c10y*c12x*c21x*c12y2*c13x-3*c11x*c20x*c12x*c21y*c13y2+2*c11x*c20x*c21x*c12y*c13y2+c11x*c11y*c21x*c12y2*c13x-3*c11x*c12x*c20y*c21x*c13y2+4*c20x*c11y*c12x*c21x*c13y2-6*c10x*c20y*c13x2*c21y*c13y-2*c10x*c12x2*c12y*c21y*c13y-6*c10y*c20x*c13x2*c21y*c13y-6*c10y*c20y*c21x*c13x2*c13y-2*c10y*c12x2*c21x*c12y*c13y-2*c10y*c12x2*c12y*c13x*c21y-c11x*c11y*c12x2*c21y*c13y-4*c11x*c20y*c12y*c13x2*c21y-2*c11x*c11y2*c21x*c13x*c13y+3*c20x*c11y*c12y*c13x2*c21y-2*c20x*c12x*c21x*c12y2*c13y-2*c20x*c12x*c12y2*c13x*c21y-6*c20x*c20y*c21x*c13x*c13y2-2*c11y*c12x*c20y*c13x2*c21y+3*c11y*c20y*c21x*c12y*c13x2-2*c12x*c20y*c21x*c12y2*c13x-c11y2*c12x*c21x*c12y*c13x+6*c20x*c20y*c13x2*c21y*c13y+2*c20x*c12x2*c12y*c21y*c13y+2*c11x2*c11y*c13x*c21y*c13y+c11x2*c12x*c12y*c21y*c13y+2*c12x2*c20y*c21x*c12y*c13y+2*c12x2*c20y*c12y*c13x*c21y+3*c10x2*c21x*c13y3-3*c10y2*c13x3*c21y+3*c20x2*c21x*c13y3+c11y3*c21x*c13x2-c11x3*c21y*c13y2-3*c20y2*c13x3*c21y-c11x*c11y2*c13x2*c21y+c11x2*c11y*c21x*c13y2-3*c10x2*c13x*c21y*c13y2+3*c10y2*c21x*c13x2*c13y-c11x2*c12y2*c13x*c21y+c11y2*c12x2*c21x*c13y-3*c20x2*c13x*c21y*c13y2+3*c20y2*c21x*c13x2*c13y,
+				c10x*c10y*c11x*c12y*c13x*c13y-c10x*c10y*c11y*c12x*c13x*c13y+c10x*c11x*c11y*c12x*c12y*c13y-c10y*c11x*c11y*c12x*c12y*c13x-c10x*c11x*c20y*c12y*c13x*c13y+6*c10x*c20x*c11y*c12y*c13x*c13y+c10x*c11y*c12x*c20y*c13x*c13y-c10y*c11x*c20x*c12y*c13x*c13y-6*c10y*c11x*c12x*c20y*c13x*c13y+c10y*c20x*c11y*c12x*c13x*c13y-c11x*c20x*c11y*c12x*c12y*c13y+c11x*c11y*c12x*c20y*c12y*c13x+c11x*c20x*c20y*c12y*c13x*c13y-c20x*c11y*c12x*c20y*c13x*c13y-2*c10x*c20x*c12y3*c13x+2*c10y*c12x3*c20y*c13y-3*c10x*c10y*c11x*c12x*c13y2-6*c10x*c10y*c20x*c13x*c13y2+3*c10x*c10y*c11y*c12y*c13x2-2*c10x*c10y*c12x*c12y2*c13x-2*c10x*c11x*c20x*c12y*c13y2-c10x*c11x*c11y*c12y2*c13x+3*c10x*c11x*c12x*c20y*c13y2-4*c10x*c20x*c11y*c12x*c13y2+3*c10y*c11x*c20x*c12x*c13y2+6*c10x*c10y*c20y*c13x2*c13y+2*c10x*c10y*c12x2*c12y*c13y+2*c10x*c11x*c11y2*c13x*c13y+2*c10x*c20x*c12x*c12y2*c13y+6*c10x*c20x*c20y*c13x*c13y2-3*c10x*c11y*c20y*c12y*c13x2+2*c10x*c12x*c20y*c12y2*c13x+c10x*c11y2*c12x*c12y*c13x+c10y*c11x*c11y*c12x2*c13y+4*c10y*c11x*c20y*c12y*c13x2-3*c10y*c20x*c11y*c12y*c13x2+2*c10y*c20x*c12x*c12y2*c13x+2*c10y*c11y*c12x*c20y*c13x2+c11x*c20x*c11y*c12y2*c13x-3*c11x*c20x*c12x*c20y*c13y2-2*c10x*c12x2*c20y*c12y*c13y-6*c10y*c20x*c20y*c13x2*c13y-2*c10y*c20x*c12x2*c12y*c13y-2*c10y*c11x2*c11y*c13x*c13y-c10y*c11x2*c12x*c12y*c13y-2*c10y*c12x2*c20y*c12y*c13x-2*c11x*c20x*c11y2*c13x*c13y-c11x*c11y*c12x2*c20y*c13y+3*c20x*c11y*c20y*c12y*c13x2-2*c20x*c12x*c20y*c12y2*c13x-c20x*c11y2*c12x*c12y*c13x+3*c10y2*c11x*c12x*c13x*c13y+3*c11x*c12x*c20y2*c13x*c13y+2*c20x*c12x2*c20y*c12y*c13y-3*c10x2*c11y*c12y*c13x*c13y+2*c11x2*c11y*c20y*c13x*c13y+c11x2*c12x*c20y*c12y*c13y-3*c20x2*c11y*c12y*c13x*c13y-c10x3*c13y3+c10y3*c13x3+c20x3*c13y3-c20y3*c13x3-3*c10x*c20x2*c13y3-c10x*c11y3*c13x2+3*c10x2*c20x*c13y3+c10y*c11x3*c13y2+3*c10y*c20y2*c13x3+c20x*c11y3*c13x2+c10x2*c12y3*c13x-3*c10y2*c20y*c13x3-c10y2*c12x3*c13y+c20x2*c12y3*c13x-c11x3*c20y*c13y2-c12x3*c20y2*c13y-c10x*c11x2*c11y*c13y2+c10y*c11x*c11y2*c13x2-3*c10x*c10y2*c13x2*c13y-c10x*c11y2*c12x2*c13y+c10y*c11x2*c12y2*c13x-c11x*c11y2*c20y*c13x2+3*c10x2*c10y*c13x*c13y2+c10x2*c11x*c12y*c13y2+2*c10x2*c11y*c12x*c13y2-2*c10y2*c11x*c12y*c13x2-c10y2*c11y*c12x*c13x2+c11x2*c20x*c11y*c13y2-3*c10x*c20y2*c13x2*c13y+3*c10y*c20x2*c13x*c13y2+c11x*c20x2*c12y*c13y2-2*c11x*c20y2*c12y*c13x2+c20x*c11y2*c12x2*c13y-c11y*c12x*c20y2*c13x2-c10x2*c12x*c12y2*c13y-3*c10x2*c20y*c13x*c13y2+3*c10y2*c20x*c13x2*c13y+c10y2*c12x2*c12y*c13x-c11x2*c20y*c12y2*c13x+2*c20x2*c11y*c12x*c13y2+3*c20x*c20y2*c13x2*c13y-c20x2*c12x*c12y2*c13y-3*c20x2*c20y*c13x*c13y2+c12x2*c20y2*c12y*c13x]);
+		
+		var TOLERANCE=1e-4;
+		var roots = poly.getRootsInInterval(0,1);
+		
+		for( var i = 0; i < roots.length; i++ )
+		{
+			var s = roots[i];
+			
+			var xRoots = new qlib.Polynomial([c13x,c12x,c11x,c10x-c20x-s*c21x-s*s*c22x-s*s*s*c23x]).getRoots();
+			var yRoots = new qlib.Polynomial([c13y,c12y,c11y,c10y-c20y-s*c21y-s*s*c22y-s*s*s*c23y]).getRoots();
+			
+			if( xRoots.length > 0 && yRoots.length > 0 )
+			{
+			
+				checkRoots:
+				for( var j = 0; j < xRoots.length; j++ )
+				{
+					var xRoot = xRoots[j];
+					if( 0 <= xRoot && xRoot <= 1 )
+					{
+						for( var k = 0; k < yRoots.length; k++ )
+						{
+							if( Math.abs(xRoot-yRoots[k]) < TOLERANCE)
+							{
+								this.appendPoint( new qlib.Vector2(c23x*s*s*s+c22x*s*s+c21x*s+c20x,c23y*s*s*s+c22y*s*s+c21y*s+c20y));
+								break checkRoots;
+							}
+						}
+					}
+				}
+				
+			}
+			
+		}
+		
+		if( this.points.length > 0 ) this.status = Intersection.INTERSECTION;
+		return this;
+	};
+			
+	p.draw = function( g, radius )
+	{
+		for ( var i = 0; i < this.points.length; i++ )
+		{
+			this.points[i].draw(g, radius);
+		}
+	}
 
 	/**
 	 * Returns a string representation of this object.

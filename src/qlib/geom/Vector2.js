@@ -232,6 +232,29 @@ var p = Vector2.prototype;
 		return new Vector2(this);
 	}
 
+	
+	p.draw = function( g, radius )
+	{
+		radius = ( radius == null ? 2 : radius );
+		g.moveTo(this.x-radius,this.y)
+		g.lineTo(this.x+radius,this.y);
+		g.moveTo(this.x,this.y-radius);
+		g.lineTo(this.x,this.y+radius);
+	}
+		
+	p.drawCircle = function( g, radius )
+	{
+		radius = ( radius == null ? 2 : radius );
+		g.drawRect(this.x-0.5,this.y-0.5,1,1);
+		g.drawCircle(this.x,this.y,radius);
+	}
+		
+	p.drawRect = function( g, radius )
+	{
+		radius = ( radius == null ? 2 : radius );
+		g.drawRect(this.x-radius,this.y-radius,radius+radius,radius+radius);
+	}
+	
 	/**
 	 * Returns a string representation of this object.
 	 * @method toString

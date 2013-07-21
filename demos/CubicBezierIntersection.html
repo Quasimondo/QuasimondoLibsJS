@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>QuasimondoLibsJS Demo: Cubic Bezier Intersection</title>
+	
+	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
+
+	<script src="http://code.createjs.com/easeljs-0.6.1.min.js"></script>
+	<script src="../src/qlib/utils/MathUtils.js"></script>
+	<script src="../src/qlib/math/Polynomial.js"></script>
+	<script src="../src/qlib/geom/GeometricShape.js"></script>
+	<script src="../src/qlib/geom/Vector2.js"></script>
+	<script src="../src/qlib/geom/LineSegment.js"></script>
+	<script src="../src/qlib/geom/Bezier3.js"></script>
+	<script src="../src/qlib/geom/Circle.js"></script>
+	<script src="../src/qlib/geom/CircleUtils.js"></script>
+	<script src="../src/qlib/geom/Intersection.js"></script>
+	<script src="../src/qlib/ui/Handle.js"></script>
+	<script src="../src/qlib/events/Event.js"></script>
+	
+
+	<script type="text/javascript">
+	var canvas;
+	var stage;
+	
+	var shp;
+	var handles;
+	var curve1;
+	var curve2;
+		
+	
+	
+	function init() {
+	    canvas = document.getElementById('myCanvas');
+	    width = canvas.width;
+	    height = canvas.height;
+	   
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		// enabled mouse over / out events
+		stage.enableMouseOver(10);
+		stage.mouseMoveOutside = true;
+		
+		
+		shp = new createjs.Shape();
+		stage.addChild(shp);
+		
+		
+		handles = [];
+			
+		for ( var i = 0; i < 8; i++ )
+		{
+			var h = new qlib.Handle( new qlib.Vector2( Math.random()*500,  Math.random()*500));
+			stage.addChild(h);
+			h.setActive(true);
+			handles.push(h); 
+		}
+		
+		curve1 = new  qlib.Bezier3( handles[0].point, handles[1].point, handles[2].point, handles[3].point);
+		curve2 = new  qlib.Bezier3( handles[4].point, handles[5].point, handles[6].point, handles[7].point);
+		
+	   createjs.Ticker.addEventListener("tick", tick);
+	}
+	
+	function tick(event) 
+	{
+			
+		 var g = shp.graphics;
+		g.clear();
+		g.setStrokeStyle(1, 'round', 'round');
+		g.beginStroke("#444");
+		curve1.drawExtras(g);
+		curve2.drawExtras(g);
+		g.beginStroke("#fff");
+		curve1.draw(g);
+		curve2.draw(g);
+			
+		g.beginStroke("#ff8000");
+		curve1.intersect(curve2).draw(g,5);
+		
+		
+		stage.update(event);
+		
+	}
+	
+	
+
+	</script>
+
+</head>
+<body onload="init()">
+
+	<header id="header" class="EaselJS">
+	    <h1><span class="text-product"><strong>QuasimondoLibs</strong> Demo:</span></h1>
+	    <p>Cubic Bezier Intersections - Drag the handles</p>
+	</header>
+
+	<canvas id="myCanvas" width="1000" height="1000"></canvas>
+
+</body>
+</html>
