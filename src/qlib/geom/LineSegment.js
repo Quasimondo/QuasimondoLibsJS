@@ -34,6 +34,17 @@ var LineSegment = function() {
   this.initialize( arguments );
 }
 
+
+LineSegment.fromPointAndAngleAndLength = function( p1, angle, length, centered )
+{
+	var line
+	if ( !centered )
+		line = new qlib.LineSegment( p1, p1.getAddCartesian( angle, length ) );
+	else
+		line = new qlib.LineSegment( p1.getAddCartesian( angle, -length*0.5 ), p1.getAddCartesian( angle, length*0.5 ) );
+	return line
+}
+
 var p = LineSegment.prototype = new qlib.GeometricShape();
 
 // public properties:
@@ -90,6 +101,63 @@ var p = LineSegment.prototype = new qlib.GeometricShape();
 		
 		return this.p1.getLerp( this.p2, t / DdD );
 	};
+	
+	p.getPoint = function( t ) 
+	{
+		return this.p1.getLerp(this.p2,t);
+	}
+	
+	p.getNormalAtPoint = function( p )
+	{
+		return new qlib.Vector2(this.p1, this.p2).getNormal();
+	}
+	
+	p.angle = function()
+	{
+		return this.p1.getAngleTo( this.p2 );
+	}
+	
+	p.getMirrorPoint = function( p )
+	{
+		var Dx = this.p2.x - this.p1.x;
+		var Dy = this.p2.y - this.p1.y;
+		var DdD = Dx*Dx + Dy*Dy;
+		if (DdD == 0) 
+		{
+			return p.getMirror( this.p1 );
+		}
+		
+		var YmP0x = p.x - this.p1.x;
+		var YmP0y = p.y - this.p1.y;
+		var t = YmP0x * Dx + YmP0y * Dy;
+		
+		return p.getMirror( this.p1.getLerp( this.p2, t / DdD ) );
+	}
+	
+	p.mirrorPoint = function( p )
+	{
+		
+		var Dx = this.p2.x - this.p1.x;
+		var Dy = this.p2.y - this.p1.y;
+		var DdD = Dx*Dx + Dy*Dy;
+		if (DdD == 0) 
+		{
+			return p.mirror( this.p1 );
+		}
+		
+		var YmP0x = p.x - this.p1.x;
+		var YmP0y = p.y - this.p1.y;
+		var t = YmP0x * Dx + YmP0y * Dy;
+		
+		return p.mirror( this.p1.getLerp( this.p2, t / DdD ) );
+	}
+		
+	
+	p.draw = function(g ) 
+	{
+		g.moveTo( this.p1.x, this.p1.y );
+		g.lineTo( this.p2.x, this.p2.y );
+	}
 	
 // public methods:
 	/**

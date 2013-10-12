@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>QuasimondoLibsJS Demo: Balancing KDTree - Find Closest Point (2000 Points)</title>
+	
+	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
+
+	<script src="http://code.createjs.com/easeljs-0.6.1.min.js"></script>
+	<script src="../src/qlib/utils/MathUtils.js"></script>
+	<script src="../src/qlib/geom/GeometricShape.js"></script>
+	<script src="../src/qlib/geom/Vector2.js"></script>
+	<script src="../src/qlib/geom/Rectangle.js"></script>
+	<script src="../src/qlib/geom/BalancingKDTree.js"></script>
+	
+	<script src="../src/qlib/events/Event.js"></script>
+	
+
+	<script type="text/javascript">
+	var canvas;
+	var stage;
+	var g;
+	var shp;
+	var overlay;
+	var tree;
+	var mousePoint;
+	
+	function init() {
+	    canvas = document.getElementById('myCanvas');
+	    width = canvas.width;
+	    height = canvas.height;
+	   
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		
+		
+		shp = new createjs.Shape();
+		stage.addChild(shp);
+		
+		overlay = new createjs.Shape();
+		stage.addChild(overlay);
+		
+		g = shp.graphics;
+		g.setStrokeStyle(1, 'round', 'round');
+		
+		tree = new qlib.BalancingKDTree();
+		pts = [];
+		for ( var i = 0; i < 2000; i++ )
+		{
+			var p = new qlib.Vector2( Math.random() * 1000, Math.random() * 1000);
+			pts.push(p);
+			g.beginStroke("#bbb");
+			p.draw(g);
+			
+		}
+		g = overlay.graphics;
+		tree.insertPoints(pts);
+		mousePoint = new qlib.Vector2();
+		lastPoint = new qlib.Vector2();
+	    createjs.Ticker.addEventListener("tick", tick);
+		stage.update();
+	}
+	
+	function tick(event) 
+	{
+		mousePoint.x = stage.mouseX;
+		mousePoint.y = stage.mouseY;
+		var nearest = tree.findNearestFor(mousePoint);
+		
+		g.clear();
+		g.setStrokeStyle(1, 'round', 'round');
+		g.beginStroke("#ff8000");
+		nearest.point.draw(g);
+		g.moveTo(nearest.point.x,nearest.point.y);
+		g.lineTo(stage.mouseX,stage.mouseY);
+		g.beginStroke("#bbbbbb");
+		g.drawCircle(stage.mouseX,stage.mouseY,nearest.point.distanceToVector(mousePoint));
+		
+		
+		stage.update(event);
+		
+	}
+	
+	
+
+	</script>
+
+</head>
+<body onload="init()">
+
+	<header id="header" class="EaselJS">
+	    <h1><span class="text-product"><strong>QuasimondoLibs</strong> Demo:</span></h1>
+	    <p>Balancing KDTree - Find Closest Point (2000 Points)</p>
+	</header>
+
+	<canvas id="myCanvas" width="1000" height="1000"></canvas>
+
+</body>
+</html>

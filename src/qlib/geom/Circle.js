@@ -86,6 +86,11 @@ this.qlib = this.qlib||{};
 		this.c.rotateAround( angle, center );
 		return this;
 	}
+	
+	p.touches = function( circle )
+	{
+		return Math.abs(this.c.distanceToVector(circle.c) - (this.r + circle.r)) < 0.0000001;
+	}
 
 	/**
 	 * Returns a clone of the Circle instance.
@@ -149,6 +154,16 @@ this.qlib = this.qlib||{};
 		return new qlib.Rectangle( this.c.x - this.r, this.c.y - this.r,this.r*2,this.r*2);
 	}
 
+	p.isInside = function( point, includeVertices )
+	{
+		includeVertices = ( includeVertices == null ? true : includeVertices);
+		return includeVertices ? point.squaredDistanceToVector(this.c)<= this.r*this.r : point.squaredDistanceToVector(this.c)< this.r*this.r;
+	}
+	
+	p.circleIsInsideOrIntersects = function( circle )
+	{
+		return circle.c.squaredDistanceToVector(this.c)<(circle.r+this.r)*(circle.r+this.r);
+	}
 	
 	//http://mathworld.wolfram.com/Polar.html
 	/**

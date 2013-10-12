@@ -105,7 +105,6 @@ var p = Vector2.prototype;
 		return Math.sqrt( this.squaredDistanceToVector(v) );
 	}
 	
-	
 	p.getLerp = function( v, l )
 	{
 		return new qlib.Vector2( this.x + (v.x - this.x) * l, this.y + (v.y - this.y) * l );
@@ -121,6 +120,11 @@ var p = Vector2.prototype;
 	p.snaps = function( v, squaredSnapDistance ) 
 	{
 		return this.squaredDistanceToVector( v ) < ( squaredSnapDistance == null ? 0.00000001 : squaredSnapDistance);
+	};
+	
+	p.equals = function ( v ) 
+	{
+		return (this.x == v.x && this.y == v.y);
 	};
 	
 	p.getLength = function()

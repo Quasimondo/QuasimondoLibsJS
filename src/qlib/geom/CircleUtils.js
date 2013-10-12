@@ -46,6 +46,18 @@ this.qlib = this.qlib||{};
 		return null;
 	}
 	
+	CircleUtils.getTangentCircles = function( c1, c2, r )
+	{
+		var ct1 = new qlib.Circle( c1.c, c1.r + r );
+		var ct2 = new qlib.Circle( c2.c, c2.r + r );
+		var inters = ct1.intersect( ct2 );
+		if ( inters.status == qlib.Intersection.INTERSECTION ) 
+		{
+			return [new qlib.Circle( inters.points[0], r ), new qlib.Circle( inters.points[1], r )];
+		}
+		return null;
+	}
+	
 	CircleUtils.getSoddyCircles = function( c1, c2, c3 )
 	{
 		var ra = c1.r;
@@ -161,9 +173,7 @@ this.qlib = this.qlib||{};
 	
 	CircleUtils.areKissingCircles = function( c1, c2, c3 )
 	{
-		return (Math.abs(c1.c.distanceToVector(c2.c) - (c1.r + c2.r)) < 0.000001) && 
-			   (Math.abs(c1.c.distanceToVector(c3.c) - (c1.r + c3.r)) < 0.000001) &&
-			   (Math.abs(c2.c.distanceToVector(c3.c) - (c2.r + c3.r)) < 0.000001);
+		return (c1.touches(c2) && c1.touches(c3) && c2.touches(c3));
 	}
 	
 	/**
