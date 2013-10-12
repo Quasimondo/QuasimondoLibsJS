@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>QuasimondoLibsJS Demo: UbiLabs KDTree - Find Closest Points (20 from 4000 Points)</title>
+	
+	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
+
+	<script src="http://code.createjs.com/easeljs-0.6.1.min.js"></script>
+	<script src="../src/qlib/utils/MathUtils.js"></script>
+	<script src="../src/qlib/geom/GeometricShape.js"></script>
+	<script src="../src/qlib/geom/Vector2.js"></script>
+	<script src="../src/qlib/geom/Rectangle.js"></script>
+	<script src="../src/qlib/geom/KDTree.js"></script>
+	
+	<script src="../src/qlib/events/Event.js"></script>
+	
+
+	<script type="text/javascript">
+	var canvas;
+	var stage;
+	var g;
+	var shp;
+	var overlay;
+	var tree;
+	var mousePoint;
+	
+	function init() {
+	    canvas = document.getElementById('myCanvas');
+	    width = canvas.width;
+	    height = canvas.height;
+	   
+		stage = new createjs.Stage(canvas);
+
+		// enable touch interactions if supported on the current device:
+		createjs.Touch.enable(stage);
+
+		
+		
+		shp = new createjs.Shape();
+		stage.addChild(shp);
+		
+		overlay = new createjs.Shape();
+		stage.addChild(overlay);
+		
+		g = shp.graphics;
+		g.setStrokeStyle(1, 'round', 'round');
+		
+		
+		pts = [];
+		for ( var i = 0; i < 4000; i++ )
+		{
+			var p = new qlib.Vector2( Math.random() * 1000, Math.random() * 1000);
+			pts.push(p);
+			g.beginStroke("#bbb");
+			p.draw(g);
+			
+		}
+		g = overlay.graphics;
+		
+		var distance = function(a, b){
+		  return Math.pow(a.x - b.x, 2) +  Math.pow(a.y - b.y, 2);
+		}
+
+		tree = new qlib.KDTree(pts, distance, ["x", "y"]);
+		
+		mousePoint = new qlib.Vector2();
+		lastPoint = new qlib.Vector2();
+	    createjs.Ticker.addEventListener("tick", tick);
+		stage.update();
+	}
+	
+	function tick(event) 
+	{
+		mousePoint.x = stage.mouseX;
+		mousePoint.y = stage.mouseY;
+		
+		
+		var nearest = tree.nearest({ x: stage.mouseX, y: stage.mouseY }, 20);
+		
+		
+		g.clear();
+		g.setStrokeStyle(1, 'round', 'round');
+		
+		for ( var i in nearest )
+		{
+			g.beginStroke("#ff8000");
+			g.moveTo(nearest[i][0].x,nearest[i][0].y);
+			g.lineTo(stage.mouseX,stage.mouseY);
+		}
+		
+		stage.update(event);
+		
+	}
+	
+	
+
+	</script>
+
+</head>
+<body onload="init()">
+
+	<header id="header" class="EaselJS">
+	    <h1><span class="text-product"><strong>QuasimondoLibs</strong> Demo:</span></h1>
+	    <p>UbiLabs KDTree - Find Closest Points (20 from 4000 Points)</p>
+	</header>
+
+	<canvas id="myCanvas" width="1000" height="1000"></canvas>
+
+</body>
+</html>
