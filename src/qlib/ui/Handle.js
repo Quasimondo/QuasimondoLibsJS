@@ -136,6 +136,7 @@ this.qlib = this.qlib||{};
 					// indicate that the stage should be updated on the next tick:
 					
 				});
+				
 			});
 			
 			this.addEventListener("mouseover", function(evt) {

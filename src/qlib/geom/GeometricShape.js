@@ -53,6 +53,18 @@ var p = GeometricShape.prototype;
 		throw("draw() not implented yet in "+this.type);
 	}
 	
+	p.scale = function( factorX, factorY, center )
+	{
+		throw("scale() not implented yet in "+this.type);
+		return null;
+	}
+	
+	p.clone = function( deepClone )
+	{
+		throw("clone() not implented yet in "+this.type);
+		return null;
+	}
+	
 	
 	/**
 	 * Returns a string representation of this object.

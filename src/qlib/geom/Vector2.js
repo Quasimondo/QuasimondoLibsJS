@@ -66,7 +66,11 @@ var p = Vector2.prototype;
 		{	
 			this.x = ( args[0] == null ? 0 : args[0]);
 			this.y = ( args[1] == null ? 0 : args[1]);
-		} else {
+		} else if ( args.length == 2 && args[0].x != null && args[0].y != null && args[1].x != null && args[1].y != null)
+		{
+			this.x = args[1].x - args[0].x;
+			this.y = args[1].y - args[0].y;
+		}else {
 			this.x = args[0].x;
 			this.y = args[0].y;
 		}
@@ -141,6 +145,11 @@ var p = Vector2.prototype;
 	{
 		return Math.atan2( this.y , this.x );
 	}
+	
+	p.getAngleTo = function( v )
+	{
+		return Math.atan2( v.y - this.y, v.x - this.x );
+	};
 	
 	p.newLength = function( len )
 	{
@@ -241,16 +250,6 @@ var p = Vector2.prototype;
 		this.y += Math.sin ( angle ) * length;
 		return this;
 	}
-	
-	p.getAngle = function( )
-	{
-		return Math.atan2( this.y , this.x );
-	}
-	
-	p.getAngleTo = function( v )
-	{
-		return Math.atan2( v.y - this.y, v.x - this.x );
-	};
 	
 	p.dot = function( v )
 	{
@@ -453,6 +452,36 @@ var p = Vector2.prototype;
 		return new qlib.Vector2( rx, this.x * sa + this.y * ca );
 	}
 	
+	p.isLower = function(v) 
+	{
+		return (this.x<v.x && this.y<v.y);
+	};
+	
+	p.isLowerOrEqual = function(v) 
+	{
+		return (this.x<=v.x && this.y<=v.y);
+	};
+	
+	p.isGreater = function(v) 
+	{
+		return (this.x>v.x && this.y>v.y);
+	};
+	
+	p.isGreaterOrEqual = function(v)
+	{
+		return (this.x>=v.x && this.y>=v.y);
+	};
+	
+	p.isLessOrEqual = function(v)
+	{
+		return (this.x<=v.x && this.y<=v.y);
+	};
+	
+	p.isLeft = function( p0,p1)
+	{
+		return (p1.x-p0.x)*(this.y-p0.y)-(this.x-p0.x)*(p1.y-p0.y);
+	}
+	
 	/**
 	 * Returns a clone of the Vector2 instance.
 	 * @method clone
@@ -492,7 +521,7 @@ var p = Vector2.prototype;
 	 * @return {String} a string representation of the instance.
 	 **/
 	p.toString = function() {
-		return "Vector2";//"[Vector2 (x="+this.x+" y="+this.y+")]";
+		return "[Vector2 (x="+this.x+" y="+this.y+")]";
 	}
 	
 qlib.Vector2 = Vector2;

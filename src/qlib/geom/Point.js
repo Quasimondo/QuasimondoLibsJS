@@ -106,6 +106,15 @@ this.qlib = this.qlib||{};
 	}
 	
 	/**
+	 * Returns a string representation of this object.
+	 * @method toString
+	 * @return {String} a string representation of the instance.
+	 **/
+	p.toString = function() {
+		return "qlib.Point("+this.x+","+this.y+")";
+	}
+	
+	/**
 	* [static] Returns the distance between pt1 and pt2.
 	* @param {Point} pt1 The first point.
 	* @param {Point} pt2 The second point.
@@ -140,6 +149,8 @@ this.qlib = this.qlib||{};
 	Point.polar = function(len, angle) {
 		return new qlib.Point(len * Math.cos(angle), len * Math.sin(angle));
 	}
+	
+	
 	
 	qlib.Point = Point;
 

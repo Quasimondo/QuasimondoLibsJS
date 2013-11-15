@@ -98,6 +98,30 @@ var p = Rectangle.prototype = new qlib.GeometricShape();
 		
 	}
 	
+	p.intersection = function( rect )
+	{
+		if ( this.width == 0 || this.height == 0 )
+		{
+			return rect.clone();
+		}
+		if ( rect.width == 0 || rect.height == 0 )
+		{
+			return this.clone();
+		}
+		this.fixValues();
+		rect.fixValues();
+		
+		var minX = this.x > rect.x ? this.x : rect.x;
+		var minY = this.y > rect.y ? this.y : rect.y;
+		var maxX = Math.min(this.x + this.width, rect.x + rect.width);
+		var maxY = Math.min(this.y + this.height, rect.y + rect.height);
+		if ( minX >= maxX || minY >= maxY ) return new qlib.Rectangle( );
+		return new qlib.Rectangle( minX, minY, maxX - minX, maxY - minY );
+		
+	}
+	
+	p.__defineGetter__("topLeft", function(){return new qlib.Point(this.x,this.y);});
+	
 // public methods:
 	/**
 	 * Returns a clone of the Rectangle instance.
@@ -119,7 +143,7 @@ var p = Rectangle.prototype = new qlib.GeometricShape();
 	 * @return {String} a string representation of the instance.
 	 **/
 	p.toString = function() {
-		return "Rectangle";
+		return "qlib.Rectangle("+this.x+","+this.y+","+this.width+","+this.height+")";
 	}
 	
 qlib.Rectangle = Rectangle;

@@ -30,11 +30,36 @@ this.qlib = this.qlib||{};
 
 (function() {
 
-var Triangle = function() {
-  this.initialize( arguments );
-}
+	var Triangle = function() {
+	  this.initialize( arguments );
+	}
 
-var p = Triangle.prototype = new qlib.GeometricShape();
+
+	Triangle.getEquilateralTriangle = function( pa, pb, clockwise )
+	{
+		return new qlib.Triangle( pa, pb, new qlib.Vector2( pa.getAddCartesian(pa.getAngleTo(pb) +  Math.PI / 3 * ( clockwise ? -1 : 1), pa.distanceToVector( pb ))) );
+	}
+	
+	Triangle.getCenteredTriangle = function( center, leftLength, rightLength, bottomLength, angle )
+	{
+		angle = angle || 0;
+		var alpha = - Math.acos( ( leftLength * leftLength - rightLength * rightLength + bottomLength * bottomLength ) / ( 2 * leftLength * bottomLength) );
+		if ( isNaN( alpha )) return null;
+		
+		var v1 = new qlib.Vector2(0,0);
+		var v2 = new qlib.Vector2(bottomLength,0 );
+		var v3 = new qlib.Vector2( Math.cos( alpha ) * leftLength, Math.sin( alpha ) * leftLength );
+		
+		var triangle = new qlib.Triangle( v1, v2, v3 );
+		var ctr = triangle.centerOfMass;
+		if ( angle != 0 ) triangle.rotate( angle );
+		triangle.translate( center.getMinus( ctr ) );
+		
+		return triangle;
+	}
+
+	var p = Triangle.prototype = new qlib.GeometricShape();
+
 
 // public properties:
 	p.type = "Triangle";
@@ -125,6 +150,23 @@ var p = Triangle.prototype = new qlib.GeometricShape();
 		return result;
 	}
 	
+	p.getSide = function( index )
+	{
+		switch ( index )
+		{
+			case 0:
+				return new qlib.LineSegment(this.p1, this.p2 );
+			break;
+			case 1:
+				return new qlib.LineSegment(this.p1, this.p3 );
+			break;
+			case 2:
+				return new qlib.LineSegment(this.p2, this.p3 );
+			break;
+		}
+		return null;
+	}
+	
 	p.getSideLength = function( index )
 	{
 		switch ( index )
@@ -147,6 +189,61 @@ var p = Triangle.prototype = new qlib.GeometricShape();
 		return qlib.CircleUtils.from3Points( this.p1, this.p2, this.p3);
 	}
 	
+	p.getInnerPoint = function( fa, fb, fc)
+	{
+		return this.p1.getLerp(this.p2, fa).plus(this.p2.getLerp(this.p3, fb)).plus(this.p3.getLerp(this.p1, fc)).multiply(1/3);
+	}
+	
+	p.getClosestSide = function( p )
+	{
+		var s = this.getSide( 0 );
+		var cp = s.getClosestPoint( p );
+		var d = p.squaredDistanceToVector(cp);
+		
+		var t =  this.getSide( 1);
+		cp = t.getClosestPoint( p );
+		var d2 = p.squaredDistanceToVector(cp);
+		if ( d2 < d )
+		{
+			d =d2;
+			s = t;
+		}
+		t =  this.getSide( 2 );
+		cp = t.getClosestPoint( p );
+		var d2 = p.squaredDistanceToVector(cp);
+		if ( d2 < d )
+		{
+			d =d2;
+			s = t;
+		}
+		return s;
+	}
+	
+	p.getClosestPoint = function( p )
+	{
+		var s = this.getSide( 0 );
+		var cp = s.getClosestPoint( p );
+		var d = p.squaredDistanceToVector(cp);
+		
+		var t =  this.getSide( 1);
+		var cp1 = t.getClosestPoint( p );
+		var d2 = p.squaredDistanceToVector(cp);
+		if ( d2 < d )
+		{
+			d = d2;
+			cp = cp1;
+		}
+		t =  this.getSide( 2 );
+		cp = t.getClosestPoint( p );
+		var d2 = p.squaredDistanceToVector(cp);
+		if ( d2 < d )
+		{
+			d = d2;
+			cp = cp1;
+		}
+		return cp;
+	}
+	
 	/**
 	 * Returns a clone of the LineSegment instance.
 	 * @method clone
@@ -166,10 +263,10 @@ var p = Triangle.prototype = new qlib.GeometricShape();
 	
 	p.draw = function(g ) 
 	{
-		this.moveToStart( g );
-		this.lineTo( this.p2.x, this.p2.y );
-		this.lineTo( this.p3.x, this.p3.y );
-		this.lineTo( this.p4.x, this.p4.y );
+		g.moveTo( this.p1.x, this.p1.y );
+		g.lineTo( this.p2.x, this.p2.y );
+		g.lineTo( this.p3.x, this.p3.y );
+		g.lineTo( this.p1.x, this.p1.y );
 	}
 	
 	/**

@@ -30,24 +30,23 @@ this.qlib = this.qlib||{};
 
 (function() {
 
-var LineSegment = function() {
-  this.initialize( arguments );
-}
+	var LineSegment = function() {
+	  this.initialize( arguments );
+	}
 
+	LineSegment.fromPointAndAngleAndLength = function( p1, angle, length, centered )
+	{
+		var line;
+		if ( !centered )
+			line = new qlib.LineSegment( p1, p1.getAddCartesian( angle, length ) );
+		else
+			line = new qlib.LineSegment( p1.getAddCartesian( angle, -length*0.5 ), p1.getAddCartesian( angle, length*0.5 ) );
+		return line
+	}
 
-LineSegment.fromPointAndAngleAndLength = function( p1, angle, length, centered )
-{
-	var line
-	if ( !centered )
-		line = new qlib.LineSegment( p1, p1.getAddCartesian( angle, length ) );
-	else
-		line = new qlib.LineSegment( p1.getAddCartesian( angle, -length*0.5 ), p1.getAddCartesian( angle, length*0.5 ) );
-	return line
-}
+	var p = LineSegment.prototype = new qlib.GeometricShape();
 
-var p = LineSegment.prototype = new qlib.GeometricShape();
-
-// public properties:
+	// public properties:
 	p.type = "LineSegment";
 	
 	
@@ -82,6 +81,14 @@ var p = LineSegment.prototype = new qlib.GeometricShape();
 	
 	}
 	
+	p.scale = function( factorX, factorY, center )
+	{
+		if ( center == null ) center = this.p1.getLerp( this.p2, 0.5 );
+		this.p1.minus( center ).multiplyXY( factorX, factorY ).plus( center );
+		this.p2.minus( center ).multiplyXY( factorX, factorY ).plus( center );
+		return this;
+	}
+	
 	p.getClosestPointOnLine = function( pt )
 	{
 		var Dx = this.p2.x - this.p1.x;
@@ -100,21 +107,67 @@ var p = LineSegment.prototype = new qlib.GeometricShape();
 		}
 		
 		return this.p1.getLerp( this.p2, t / DdD );
-	};
+	}
+	
+	p.getClosestPoint = function( pt )
+	{
+		var Dx = this.p2.x - this.p1.x;
+		var Dy = this.p2.y - this.p1.y;
+		
+		var YmP0x = pt.x - this.p1.x;
+		var YmP0y = pt.y - this.p1.y;
+		
+		var t = YmP0x * Dx + YmP0y * Dy;
+		
+		if ( t <= 0) 
+		{
+			return new qlib.Vector2( this.p1 );
+		}
+		
+		var DdD = Dx*Dx + Dy*Dy;
+		if ( t >= DdD ) 
+		{
+			return new qlib.Vector2( this.p2 );
+		}
+		
+		if (DdD == 0) 
+		{
+			return new qlib.Vector2( this.p1 );
+		}
+		
+		return this.p1.getLerp( this.p2, t / DdD );
+	}
 	
 	p.getPoint = function( t ) 
 	{
 		return this.p1.getLerp(this.p2,t);
 	}
 	
-	p.getNormalAtPoint = function( p )
+	p.getNormal = function()
 	{
 		return new qlib.Vector2(this.p1, this.p2).getNormal();
 	}
 	
-	p.angle = function()
+	p.getNormalAtPoint = function( p )
 	{
-		return this.p1.getAngleTo( this.p2 );
+		return this.getNormal();
+	}
+	
+	p.squaredDistanceToPoint = function( pt ) 
+	{
+		var p = new qlib.Vector2(pt);
+		var D = new qlib.Vector2(this.p1, this.p2);
+		var YmP0 = new qlib.Vector2(this.p1, p);
+		var t = D.dot(YmP0);
+		if (t<=0) {
+			return YmP0.dot(YmP0);
+		}
+		var DdD = D.dot(D);
+		if (t>=DdD) {
+			var YmP1 = new qlib.Vector2(p, this.p2);
+			return YmP1.dot(YmP1);
+		}
+		return YmP0.dot(YmP0)-t*t/DdD;
 	}
 	
 	p.getMirrorPoint = function( p )
@@ -151,7 +204,21 @@ var p = LineSegment.prototype = new qlib.GeometricShape();
 		
 		return p.mirror( this.p1.getLerp( this.p2, t / DdD ) );
 	}
-		
+	
+	p.isLeft = function( p )
+	{
+		return (this.p2.x-this.p1.x)*(p.y-this.p1.y)-(p.x-this.p1.x)*(this.p2.y-this.p1.y);
+	}
+	
+	p.getSlope = function()
+	{
+		return (this.p2.y-this.p1.y) / (this.p2.x-this.p1.x);
+	}
+	
+	p.getIntercept = function()
+	{
+		return this.p1.y - this.getSlope() * this.p1.x;
+	}
 	
 	p.draw = function(g ) 
 	{
@@ -159,7 +226,11 @@ var p = LineSegment.prototype = new qlib.GeometricShape();
 		g.lineTo( this.p2.x, this.p2.y );
 	}
 	
-// public methods:
+	p.__defineGetter__("angle", function(){return  this.p1.getAngleTo( this.p2 );});
+	
+	p.__defineGetter__("length", function(){return  this.p1.distanceToVector( this.p2 );});
+	
+	// public methods:
 	/**
 	 * Returns a clone of the LineSegment instance.
 	 * @method clone
@@ -181,5 +252,5 @@ var p = LineSegment.prototype = new qlib.GeometricShape();
 		return "LineSegment";
 	}
 	
-qlib.LineSegment = LineSegment;
+	qlib.LineSegment = LineSegment;
 }());

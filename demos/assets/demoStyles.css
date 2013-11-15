@@ -50,20 +50,15 @@ a:hover {
 
 
 .content {
-	width:		980px;
-	height:		420px;
+	
 	padding:	10px;
 
-	position:		absolute;
-	top:			50%;
-	left:			50%;
-	margin-top:		-210px;
-	margin-left:	-490px;
+	
 
 	color:			#777;
 
 	border:				1px solid #555;
-	background-color:	#ccc;
+	background-color:	#000;
 }
 
 #loader {
