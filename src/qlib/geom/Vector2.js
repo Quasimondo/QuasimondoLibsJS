@@ -131,6 +131,8 @@ var p = Vector2.prototype;
 		return (this.x == v.x && this.y == v.y);
 	};
 	
+	p.__defineGetter__("length", function(){ return this.getLength();});
+	
 	p.getLength = function()
 	{
 		return Math.sqrt( this.x * this.x + this.y * this.y );

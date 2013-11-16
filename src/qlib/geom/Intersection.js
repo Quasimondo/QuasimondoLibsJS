@@ -602,17 +602,35 @@ var p = Intersection.prototype;
 			if (0<=ua && ua<=1 && 0<=ub && ub<=1) 
 			{
 				this.points[0] = new qlib.Vector2( l1.p1.x + ua * d5, l1.p1.y + ua * d6 );
-				this.status = qlib.Intersection.INTERSECTION;
+				this.status = Intersection.INTERSECTION;
 			} 
 		} else {
 			if (ua_t == 0 || ub_t == 0) {
-				this.status = qlib.Intersection.COINCIDENT;
+				this.status = Intersection.COINCIDENT;
 			} else {
-				this.status = qlib.Intersection.PARALLEL;
+				this.status = Intersection.PARALLEL;
 			}
 		}
 		return this;
 	};
+	
+	p.line_polygon = function( l, p )
+	{
+		var intersection;
+		for ( var i = 0; i < p.pointCount; i++ )
+		{
+			intersection = l.intersect( p.getSide( i ) );
+			if ( intersection.status == Intersection.INTERSECTION )
+			{
+				this.status = Intersection.INTERSECTION;
+				this.appendPoint( intersection.points[0] );
+			} else if ( this.status == Intersection.NO_INTERSECTION )
+			{
+				this.status = intersection.status;
+			}
+		}
+		return this;
+	}
 	
 	p.line_triangle = function( l, t )
 	{
@@ -621,11 +639,11 @@ var p = Intersection.prototype;
 		for ( var i = 0; i < 3; i++ )
 		{
 			intersection = l.intersect( t.getSide( i ) );
-			if ( intersection.status == qlib.Intersection.INTERSECTION )
+			if ( intersection.status == Intersection.INTERSECTION )
 			{
-				this.status = qlib.Intersection.INTERSECTION;
+				this.status = Intersection.INTERSECTION;
 				this.appendPoint( intersection.points[0] );
-			} else if ( this.status == qlib.Intersection.NO_INTERSECTION )
+			} else if ( this.status == Intersection.NO_INTERSECTION )
 			{
 				this.status = intersection.status;
 			}

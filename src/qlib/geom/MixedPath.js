@@ -1,0 +1,1106 @@
+/*
+* MixedPath
+*
+* Copyright (c) 2013 Mario Klingemann
+* 
+* Permission is hereby granted, free of charge, to any person
+* obtaining a copy of this software and associated documentation
+* files (the "Software"), to deal in the Software without
+* restriction, including without limitation the rights to use,
+* copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following
+* conditions:
+* 
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// namespace:
+this.qlib = this.qlib || {};
+
+(function() {
+	"use strict";
+	
+	var MixedPath = function() {
+	  this.initialize( arguments );
+	}
+	
+	var p = MixedPath.prototype = new qlib.GeometricShape();
+	
+	MixedPath.LINEARIZE_APPROXIMATE = 0;
+	MixedPath.LINEARIZE_COMPLETE = 1;
+	MixedPath.LINEARIZE_UNDERSHOOT = 2;
+	MixedPath.LINEARIZE_OVERSHOOT = 3;
+	MixedPath.LINEARIZE_CENTER = 4;
+	
+	MixedPath.fromLinearPath = function (lp, clonePoints )
+	{
+		var mp = new qlib.MixedPath();
+		for ( var i = 0; i < lp.pointCount; i++ )
+		{
+			mp.addPoint(  clonePoints ? lp.points[i].getClone() :  lp.points[i] );	
+		}
+		mp.updateSegments();
+		return mp;
+	}
+	
+	MixedPath.getRoundedRect = function( center, width, height, cornerRadius )
+	{
+		cornerRadius = Math.min( cornerRadius, Math.min( width, height ) * 0.5 );
+		if ( cornerRadius < 0 ) cornerRadius = 0;
+		var mp = new qlib.MixedPath();
+		
+		var w2 = width * 0.5;
+		var h2 = height * 0.5;
+		var dx = w2 - cornerRadius;
+		var dy = h2 - cornerRadius;
+		
+		var drx = Math.cos(-0.785398163) * cornerRadius;
+		var dry = Math.sin(-0.785398163) * cornerRadius;
+		
+		var k = 0.5522847498 * cornerRadius * 0.5;
+		var dcx = Math.cos(-2.35619449) * k;
+		var dcy = Math.sin(-2.35619449) * k;
+		
+		
+		mp.addPoint( new qlib.Vector2( center.x + dx, center.y - h2 ) );
+		mp.addControlPoint( new qlib.Vector2( center.x + dx + k, center.y - h2 ) );
+		mp.addControlPoint( new qlib.Vector2( center.x + dx + drx + dcx, center.y - dy + dry + dcy ) );
+		mp.addPoint( new qlib.Vector2( center.x + dx + drx, center.y - dy + dry ) );
+		mp.addControlPoint( new qlib.Vector2( center.x + dx + drx - dcx, center.y - dy + dry - dcy ) );
+		mp.addControlPoint( new qlib.Vector2( center.x + w2, center.y - dy - k ) );
+		mp.addPoint( new qlib.Vector2( center.x + w2, center.y - dy ) );
+		if ( cornerRadius < h2 ) mp.addPoint( new qlib.Vector2( center.x + w2, center.y + dy ) );
+		mp.addControlPoint( new qlib.Vector2( center.x + w2, center.y + dy + k ) );
+		mp.addControlPoint( new qlib.Vector2( center.x + dx + drx - dcx, center.y + dy - dry + dcy ) );
+		mp.addPoint( new qlib.Vector2( center.x + dx + drx, center.y + dy - dry ) );
+		mp.addControlPoint( new qlib.Vector2( center.x + dx + drx + dcx, center.y + dy - dry - dcy ) );
+		mp.addControlPoint( new qlib.Vector2( center.x + dx + k, center.y + h2 ) );
+		mp.addPoint( new qlib.Vector2( center.x + dx, center.y + h2 ) );
+		if ( cornerRadius < w2 ) mp.addPoint( new qlib.Vector2( center.x - dx, center.y + h2 ) );
+		mp.addControlPoint( new qlib.Vector2( center.x - dx - k, center.y + h2 ) );
+		mp.addControlPoint( new qlib.Vector2( center.x - dx - drx - dcx, center.y + dy - dry - dcy ) );
+		mp.addPoint( new qlib.Vector2( center.x - dx - drx, center.y + dy - dry ) );
+		mp.addControlPoint( new qlib.Vector2( center.x - dx - drx + dcx, center.y + dy - dry + dcy ) );
+		mp.addControlPoint( new qlib.Vector2( center.x - w2, center.y + dy + k ) );
+		mp.addPoint( new qlib.Vector2( center.x - w2, center.y + dy ) );
+		if ( cornerRadius < h2 ) mp.addPoint( new qlib.Vector2( center.x - w2, center.y - dy ) );
+		mp.addControlPoint( new qlib.Vector2( center.x - w2, center.y - dy - k ) );
+		mp.addControlPoint( new qlib.Vector2( center.x - dx - drx + dcx, center.y - dy + dry  - dcy ) );
+		mp.addPoint( new qlib.Vector2( center.x - dx - drx, center.y - dy + dry ) );
+		mp.addControlPoint( new qlib.Vector2( center.x - dx - drx - dcx, center.y - dy + dry  + dcy ) );
+		mp.addControlPoint( new qlib.Vector2( center.x - dx - k, center.y - h2 ) );
+		if ( cornerRadius < w2 ) mp.addPoint( new qlib.Vector2( center.x - dx, center.y - h2 ) );
+		
+		mp.closed = true;
+		return mp;
+	}
+		
+	MixedPath.fromString = function( s )
+	{
+		var path = new qlib.MixedPath();
+		var p = s.split(";");
+		path.closed = ( p[0] == "closed" );
+		p = p[1].split(",");
+		var pt, v;
+		for (var i = 0;i<p.length;i++)
+		{
+			pt =  p[i].split("|");
+			v = new qlib.Vector2(parseFloat(pt[0]),parseFloat(pt[1]));
+			if (pt.length == 3)
+			{
+				path.addControlPoint(v,false);
+			}
+			else {
+				path.addPoint(v,false);
+			}
+		}
+		path.updateSegments();
+		return path;
+	}
+		
+	// public properties:
+	p.type = "MixedPath";
+	
+	
+	// constructor:
+	/** 
+	 * Initialization method.
+	 * @method initialize
+	 * @protected
+	*/
+	p.initialize = function( args ) 
+	{
+		this.points = [];
+		this.segments = [];
+		this._closed = false;
+		this.isValid = false;
+		this.dirty = true;
+	}
+	
+	p.addPoint = function ( p, update )
+	{
+		this.dirty = true;
+		var p = new qlib.MixedPathPoint( p, false );
+		this.points.push( p );
+		if ( update ) this.updateSegments();
+		
+		return p;
+	}
+	
+	p.addControlPoint = function( p, update )
+	{
+		this.dirty = true;
+		var p = new qlib.MixedPathPoint( p, true );
+		this.points.push( p );
+		if ( update ) this.updateSegments();
+		return p;
+	}
+	
+	p.insertPointAt = function( p, index, update  )
+	{
+		this.dirty = true;
+		var p = new qlib.MixedPathPoint( p, false );
+		this.points.splice( index, 0, p );
+		if ( update ) this.updateSegments();
+		return p;
+	}
+	
+	p.insertControlPointAt = function( p, index, update  )
+	{
+		this.dirty = true;
+		var p = new qlib.MixedPathPoint( p, true );
+		this.points.splice( index, 0,p );
+		if ( update ) this.updateSegments();
+		return p;
+	}
+	
+	p.deletePoint = function( p )
+	{
+		for (var i = this.points.length;--i>-1;)
+		{
+			if ( this.points[i] == p )
+			{
+				this.points.splice(i,1);
+				return this.updateSegments();
+			}
+		}
+		
+		return this.isValid;
+	}
+	
+	p.deletePointAt = function( index )
+	{
+		if ( index !=this.points.length ) return this.isValid;
+		this.points.splice( index, 1 );
+		return this.updateSegments();
+	}
+	
+	p.fixIndex = function( index )
+	{
+		return (((index % this.points.length) + this.points.length)% this.points.length) | 0;
+	}
+	
+	p.getPointAt = function( index )
+	{
+		return this.points[this.fixIndex(index)];
+	}
+	
+	p.getIndexOfPoint = function( mixedPathPoint )
+	{
+		return this.points.indexOf(mixedPathPoint);
+	}
+	
+	p.updatePointAt = function( index, p )
+	{
+		this.points[this.fixIndex(index)] = p;
+		return this.updateSegments();
+	}
+	
+	p.__defineGetter__("centroid", function(){return this.toLinearPath( 3 ).centroid;});
+	
+	p.__defineGetter__("length", function()
+	{
+		if ( this.dirty ) this.updateSegments();	
+		var len = 0;
+		for (var i = this.segments.length; --i>-1;)
+		{
+			len += this.segments[i].length;
+		}
+		return len;
+	});
+	
+	p.__defineGetter__("closed", function(){return this._closed;});
+	p.__defineSetter__("closed", function( value ){
+		this._closed = value;
+		return this.updateSegments();
+	});
+	
+	p.__defineGetter__("cornerCount", function(){
+		if ( this.dirty && !this.updateSegments() ) return 0;
+		return this.segments.length + ( this._closed ? 0 : 1 );
+	});
+	
+	p.__defineGetter__("segmentCount", function(){
+		if ( this.dirty && !this.updateSegments() ) return 0;
+		return this.segments.length;
+	});
+	
+	p.__defineGetter__("pointCount", function(){return this.points.length;});
+	
+	
+	p.getPoint = function( t )
+	{
+		if ( this.dirty ) this.updateSegments();
+		
+		t = t || 0;
+		if ( !this.isValid || (!this._closed && (t<0 || t>1))) return null;
+		if ( !this._closed )
+		{
+			if ( t > 1 ) t == 1;
+			else if ( t < 0 ) t == 0;
+		} else {
+			t = ((t%1)+1)%1;
+		}
+		
+		var last_t = 0;
+		var t_sub;
+		for (var i=0;i<this.segments.length;i++)
+		{
+			if (t <= this.t_toSegments[i] )
+			{
+				if (this.t_toSegments[i] - last_t != 0)
+					t_sub = ( t - last_t ) / (this.t_toSegments[i] - last_t);
+				else 
+					t_sub = 0;
+				return this.segments[i].getPoint(t_sub);
+			}
+			last_t = this.t_toSegments[i];
+		}
+		
+		return null;
+	}
+
+	p.getNormalAt = function( t, radius  )
+	{
+		if ( radius == null ) radius = 3;
+		if ( this.dirty ) this.updateSegments();
+		
+		if ( !this.isValid || (!this._closed && (t<0 || t>1))) return null;
+		if ( !this._closed )
+		{
+			if ( t > 1 ) t == 1;
+			else if ( t < 0 ) t == 0;
+		} else {
+			t = ((t%1)+1)%1;
+		}
+		
+		var last_t = 0;
+		var t_sub;
+		for (var i=0;i<this.segments.length;i++)
+		{
+			if (t <= this.t_toSegments[i] )
+			{
+				if (this.t_toSegments[i] - last_t != 0)
+					t_sub = ( t - last_t ) / (this.t_toSegments[i] - last_t);
+				else 
+					t_sub = 0;
+				return this.segments[i].getNormalAt(t_sub);
+			}
+			last_t = this.t_toSegments[i];
+		}
+		return null;
+	}
+	
+	p.getPointAt_offset = function( offset )
+	{
+		if ( this.dirty ) this.updateSegments();
+		
+		if ( !this.isValid || (!this._closed && (offset<0 || offset>this.totalLength))) return null;
+		
+		offset = ((offset%this.totalLength)+this.totalLength)%this.totalLength;
+		
+		var last_offset = 0;
+		
+		for (var i=0;i<this.segments.length;i++)
+		{
+			if (offset<=length_toSegments[i]){
+				return this.segments[i].getPointAtOffset( offset - last_offset );
+			}
+			last_offset = length_toSegments[i];
+		}
+		
+		return null;
+	}
+	
+	p.line2Bezier3 = function( p1, p2 )
+	{
+		var index;
+		for ( var i = 0; i < this.points.length; i++ )
+		{
+			if ( this.points[i] == p1)
+			{
+				if ( this.points[i].isControlPoint ||  this.points[i+1].isControlPoint || this.points[i+1] != p2  )
+				{
+					return null;					
+				}
+				index = i;
+				break;
+			} else if ( this.points[i] == p2){
+				if (  this.points[i].isControlPoint || this.points[i+1].isControlPoint || this.points[i+1]!= p1  ){
+					return null;					
+				}
+				index = i;
+				break;
+			}
+		}
+		
+		
+		this.points.splice( index+1, 0, new qlib.MixedPathPoint( this.points[index].getLerp(this.points[index+1],0.333), true),
+										new qlib.MixedPathPoint( this.points[index].getLerp(this.points[index+1],0.666), true) );
+		this.updateSegments();
+		return [ this.points[index+1], this.points[index+2] ];
+	}
+	
+	p.hasPoint = function( p )
+	{
+		for ( var i = this.points.length; --i>-1;)
+		{
+			if ( p.squaredDistanceToVector( this.points[i] ) < SNAP_DISTANCE * SNAP_DISTANCE) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	p.isValidPath = function() 
+	{
+		if ( this.points.length < 2 ) return false;
+		var cCounter=0;
+		for (var i = this.points.length + ( this._closed ? 1 :0 ); --i>-1;)
+		{
+			if ( this.points[ i%this.points.length ].isControlPoint )
+			{
+				cCounter++;
+			} else {
+				cCounter=0;
+			}
+			if (cCounter == 3) return false;
+		}
+		return true;
+	}
+
+	p.getClosestPathPoint = function( v )
+	{
+		if ( this.points.length==0 ) return null;
+		
+		var d = this.points[0].squaredDistanceToVector( v );
+		var closestPoint = this.points[0];
+		var d2;
+		for (var i = this.points.length;--i>0;)
+		{
+			d2 = this.points[i].squaredDistanceToVector( v );
+			if (d2<d)
+			{
+				d=d2;
+				closest = this.points[i];
+			}
+		}
+		return closest;
+	}
+	
+	p.getClosestCorner = function( v )
+	{
+		if ( this.points.length==0 ) return null;
+		
+		var c = this.getCorner(0);
+		var d = c.squaredDistanceToVector( v );
+		var closest = c;
+		var d2;
+		for (var i = this.cornerCount;--i>0;)
+		{
+			c = this.getCorner(i);
+			d2 = c.squaredDistanceToVector( v );
+			if (d2<d)
+			{
+				d = d2;
+				closest = c;
+			}
+		}
+		return closest;
+	}
+
+	p.getNeighbours = function( p )
+	{
+		var n = [];
+		for ( var i = 0; i < this.points.length;i++ )
+		{
+			if ( this.points[i] == p)
+			{
+				if ( i-1 > 0)
+				{
+					if ( !this.points[i-1].isControlPoint )
+					{
+						n.push( this.points[i-1] );
+					}
+				}
+				if ( i+1 < this.points.length )
+				{
+					if ( !this.points[i+1].isControlPoint )
+					{
+						n.push( this.points[i+1] ); 
+					}
+				}
+				return n;
+			}
+		}
+		return null;
+	}
+	
+	p.getClosestPoint = function( p )
+	{
+		if ( this.dirty ) this.updateSegments();
+		
+		var closest = this.segments[0].getClosestPoint( p );
+		var minDist = closest.squaredDistanceToVector( p );
+		var dist;
+		var pt;
+		for ( var i = 1; i < this.segments.length; i++ )
+		{
+			pt = this.segments[i].getClosestPoint( p );
+			dist = pt.squaredDistanceToVector( p );
+			if ( dist < minDist ) {
+				minDist = dist;
+				closest = pt;
+			}
+		}
+		return closest;
+	}
+	
+	p.getClosestT = function( p )
+	{
+		if ( this.dirty ) this.updateSegments();
+		
+		var closest = this.segments[0].getClosestPoint( p );
+		var minDist = closest.squaredDistanceToVector( p );
+		var closestSegmentindex = 0;
+		var dist;
+		var pt;
+		for ( var i = 1; i < this.segments.length; i++ )
+		{
+			pt = this.segments[i].getClosestPoint( p );
+			dist = pt.squaredDistanceToVector( p );
+			if ( dist < minDist ) {
+				minDist = dist ;
+				closest = pt;
+				closestSegmentIndex = i;
+			}
+		}
+		
+		var ts = this.segments[closestSegmentIndex].getClosestT( p );
+		var t0 = closestSegmentIndex > 0 ? this.t_toSegments[closestSegmentIndex - 1] : 0;
+		ts = t0 + ts * ( this.t_toSegments[closestSegmentIndex ] - t0 ); 
+		return ts;
+	}
+
+	p.updateSegments = function()
+	{
+		this.dirty = false;
+		this.segments = [];
+		if (!(this.isValid = this.isValidPath())) return false;
+		
+		var traverse = this.points.length + ( this._closed ? 0 :-1 );
+		
+		var currentIndex = 0;
+		while (  this.points[ currentIndex ].isControlPoint )
+		{
+			currentIndex++;
+		}
+		var currentPoint = this.points[ currentIndex ];
+		
+		var pointStack = [];
+		pointStack.push( currentPoint );
+		
+		while (traverse>0)
+		{
+			currentIndex++;
+			currentPoint = this.points[ currentIndex % this.points.length ] ;
+			pointStack.push( currentPoint );
+			if (!currentPoint.isControlPoint)
+			{
+				var l = pointStack.length;
+				switch ( l )
+				{
+					case 2:
+						if ( !pointStack[0].snaps( pointStack[1]) ||  this.points.length == 2 )
+						{
+							this.segments.push(new qlib.LineSegment( pointStack[0],pointStack[1]));
+						}
+						pointStack.shift();
+						break;
+					case 3:
+						this.segments.push(new qlib.Bezier2(pointStack[0],pointStack[1],pointStack[2]));
+						pointStack.shift();
+						pointStack.shift();
+						break;
+					case 4:
+						this.segments.push(new qlib.Bezier3(pointStack[0],pointStack[1],pointStack[2],pointStack[3]));
+						pointStack.shift();
+						pointStack.shift();
+						pointStack.shift();
+						break;
+				}
+			}
+			traverse--;
+		}
+		this.updateLookupTables();
+		return true;
+	}
+	
+	p.getAngleAtCorner = function( index )
+	{
+		if ( this.dirty && !this.updateSegments() ) return 0;
+		
+		var s1, s2;
+		
+		if ( this._closed )
+		{
+			s1 = this.segments[(index+this.segments.length-1) % this.segments.length];
+			s2 = this.segments[index];
+		} else {
+			if ( index == 0 || index == this.segments.length)
+			{
+				return 0;
+			} else {
+				s1 = this.segments[index-1];
+				s2 = this.segments[index];
+			}
+		}
+		var pl, pm, pr;
+		
+		if ( s1.type == "LineSegment" )
+		{
+			pl = s1.p1;
+			pm = s1.p2;
+		} else if ( s1.type == "Bezier2" )
+		{
+			pl = s1.c;
+			pm = s1.p2;
+		} else if ( s1.type == "Bezier3" )
+		{
+			pl = s1.c2;
+			pm = s1.p2;
+		}
+		
+		if ( s2.type == "LineSegment" )
+		{
+			pr = s2.p2;
+		} else if ( s2.type == "Bezier2" )
+		{
+			pr = s2.c;
+		} else if ( s2.type == "Bezier3" )
+		{
+			pr = s2.c1;
+		}
+		return pm.cornerAngle(pr,pl);
+	}
+	
+	
+	
+	p.getCorner = function( index )
+	{
+		if ( this.dirty && !this.updateSegments() ) return null;
+		
+		if ( closed ) index = (( index % cornerCount ) + cornerCount ) % cornerCount;
+		else if ( index < 0 ) index = 0;
+		else if ( index >= cornerCount )
+		{
+			return this.segments[this.segments.length-1].p2;
+		}
+		
+		return this.segments[index].p1;
+	}
+	
+	
+	p.getSegment = function( index )
+	{
+		if ( this.dirty && !this.updateSegments() ) return null;
+		
+		index %= this.segments.length;
+		if ( index < 0 ) index += this.segments.length;
+		return this.segments[index];
+	}
+	
+	p.toLinearPath = function( segmentLength, mode )
+	{
+		if ( this.dirty && !this.updateSegments() ) return null;
+		
+		var lp = new qlib.LinearPath();
+		var s,ti,t,steps,j;
+		
+		var totalLength = this.length;
+		if ( totalLength == 0 ) return lp;
+		
+		var totalSteps = totalLength / segmentLength;
+		var t_step;
+		var t_base = 0;
+		mode = mode || LINEARIZE_APPROXIMATE;
+		
+		if ( mode != MixedPath.LINEARIZE_APPROXIMATE )
+		{
+			var coveredLength = totalSteps * segmentLength;
+			t_step = (coveredLength / totalLength) / totalSteps;
+			if ( mode == MixedPath.LINEARIZE_CENTER ) t_base = 0.5 * (1 - ( coveredLength / totalLength ));
+		} else {
+			t_step = totalSteps > 0 ? 1 / totalSteps : totalLength;
+		}
+		
+		if ( mode == MixedPath.LINEARIZE_CENTER && t_base != 0 ) lp.addPoint( this.getPoint(0) );
+		for ( var i = 0; i <= totalSteps; i++ )
+		{
+			lp.addPoint( this.getPoint( t_base + i * t_step ) );
+		}
+		if ( mode ==  MixedPath.LINEARIZE_OVERSHOOT ) {
+			var p1 = lp.points[lp.points.length-1];
+			var p2 = this.getPoint( 1 );
+			lp.addPoint( p2.minus( p1 ).newLength( segmentLength ).plus(p1) );
+		} else if ( (mode == MixedPath.LINEARIZE_CENTER && t_base != 0) || ( mode == MixedPath.LINEARIZE_COMPLETE && (i-1) * t_step != 1) ) lp.addPoint( this.getPoint(1) );
+		
+		
+		if ( this._closed )
+		{
+			lp.addPoint( this.segments[0].getPoint( 0 ) );
+		}
+		
+		return lp;
+	}
+	
+	p.toPolygon = function( segmentLength )
+	{
+		if ( this.dirty && !this.updateSegments() ) return null;
+		
+		var poly = new qlib.Polygon();
+		var s,ti,t,steps,j;
+		segmentLength = segmentLength || 3;
+		for ( var i = 0; i < this.segments.length; i++ )
+		{
+			s = this.segments[i];
+			if ( s.type == "LineSegment" )
+			{
+				poly.addPoint(s.p1.getClone());
+			} else {
+				steps = s.length / segmentLength;
+				steps--;
+				for ( j = 0; j < steps; j+=1 )
+				{
+					t = j / steps;
+					poly.addPoint( s.getPoint( t ) );
+				}
+			}
+		}
+		return poly;
+	}
+	
+	
+	p.getBoundingRect = function( loose )
+	{
+		if ( this.dirty && !this.updateSegments() ) return null;
+		
+		var i, j, steps,p;
+		if ( loose == null ) loose = true;
+		if ( loose )
+		{
+			if ( this.segments.length == 0 ) return null;
+			var s = this.segments[0];
+			var r = s.getBoundingRect();
+			for ( i = 1; i < this.segments.length; i++ )
+			{
+				r = r.union( this.segments[i].getBoundingRect() );
+			}
+		} else {
+			var minP = this.segments[0].getPoint( 0 ).getClone();
+			var maxP = this.segments[0].getPoint( 0 ).getClone();
+			var segmentLength = 1;
+			for ( i = 0; i < this.segments.length; i++ )
+			{
+				s = this.segments[i] ;
+				if ( s.type == "LineSegment" )
+				{
+					p = s.getPoint( 0 );
+					minP.min( p );
+					maxP.max( p );
+					p = s.getPoint( 1 );
+					minP.min( p );
+					maxP.max( p );
+				} else {
+					steps = s.length / segmentLength;
+					steps--;
+					for ( j = 0; j < steps; j+=1 )
+					{
+						p = s.getPoint( j / steps );
+						minP.min( p );
+						maxP.max( p );
+					}
+				}
+			}
+			maxP.minus( minP );
+			return new qlib.Rectangle( minP.x, minP.y , maxP.x, maxP.y  );
+		}
+		return r;
+	}
+	
+	p.translate = function(offset)
+	{
+		var p = this.points;
+		for ( var i=p.length; --i>-1; )
+		{
+			p[i].plus( offset );
+		}
+		return this;
+	}
+	
+	p.rotate = function( angle, center )
+	{
+		if ( center == null ) center = this.centroid;
+		var p = this.points;
+		for ( var i=p.length; --i>-1; )
+		{
+			p[i].rotateAround(angle, center );
+		}
+		return this;
+	}
+	
+	p.scale = function( factorX, factorY, center )
+	{
+		if ( center == null ) center = this.centroid;
+		var p = this.points;
+		for ( var i=p.length; --i>-1; )
+		{
+			p[i].minus( center ).multiplyXY( factorX, factorY ).plus( center );
+		}
+		this.dirty = true;
+		return this;
+	}
+	
+	p.getNormalAtPoint = function(p)
+	{
+		return this.toLinearPath( 1 ).getNormalAtPoint( p );
+	}
+
+	p.updateLookupTables = function()
+	{
+		this.t_toSegments = [];
+		this.length_toSegments = [];
+		this.totalLength = 0; 
+		for ( var i = 0; i < this.segments.length; i++ )
+		{
+			this.totalLength += this.segments[i].length;
+			this.length_toSegments[i] = this.totalLength;
+		}
+		for ( i = this.segments.length; --i>-1; )
+		{
+			this.t_toSegments[i] = this.length_toSegments[i] / this.totalLength;
+		}
+	}
+	
+	p.appendPath = function( p )
+	{
+		this.points = this.points.concat( p.points );
+		this.dirty = true;
+	}
+	
+	
+	p.isInside = function( p, includeVertices )
+	{
+		if ( includeVertices == null ) includeVertices = true;
+		var r = this.getBoundingRect( true );
+		var l = new qlib.LineSegment( p, new qlib.Vector2( r.x - 1, r.y - 1 ) );
+		var intersection = l.intersect( this );
+		return (intersection.points.length % 2 != 0);
+	}
+
+	
+	p.clone = function( deepClone )
+	{
+		if ( deepClone == null ) deepClone = true;
+		
+		var path = new qlib.MixedPath();
+		for ( var i = 0; i<this.points.length; i++)
+		{
+			if ( deepClone )
+				path.points.push( new qlib.MixedPathPoint( new qlib.Vector2(this.points[i].x,this.points[i].y), this.points[i].isControlPoint ) );
+			else
+				path.points.push(this.points[i]);
+		}
+		path._closed = this._closed;
+		path.updateSegments();
+		return path;
+	}
+	
+	p.shiftStartCorner = function( delta )
+	{
+		if ( !this._closed ) return;
+		
+		if (this.isValid)
+		{
+			var p;
+			if ( delta > 0 )
+			{
+				while ( delta > 0 )
+				{
+					p = this.points.shift();
+					this.points.push ( p );
+					if ( !p.isControlPoint ) delta--;
+				}
+			} else {
+				while ( delta < 0 )
+				{
+					p = this.points.pop();
+					this.points.unshift( p );
+					if ( !p.isControlPoint ) delta++;
+				}
+			}
+			this.updateSegments();
+		}
+	}
+	
+	p.getSplitAtT = function( t, clonePoints )
+	{
+		if ( clonePoints == null ) clonePoints = true;
+		
+		var result = [];
+		if ( t<=0 || t>=1) return result;
+		
+		if ( this.dirty ) this.updateSegments();
+		if (!this.isValid) return result;
+		
+		var leftPath = new qlib.MixedPath();
+		var rightPath = new qlib.MixedPath();
+		var last_t = 0;
+		var t_sub;
+		for (var i=0;i<this.segments.length;i++)
+		{
+			if (t <= this.t_toSegments[i] )
+			{
+				if (this.t_toSegments[i] - last_t != 0)
+					t_sub = ( t - last_t ) / (this.t_toSegments[i] - last_t);
+				else 
+					t_sub = 0;
+				
+				if ( t_sub == 0 )
+				{
+					leftPath.addPoint( clonePoints ? this.segments[i].p1.getClone() :this.segments[i].p1 );
+					rightPath.addPoint( clonePoints ? this.segments[i].p1.getClone() : this.segments[i].p1 );
+						
+					if ( this.segments[i].type == "Bezier2" )
+					{
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c.getClone() :  Bezier2( this.segments[i] ).c );
+						
+					} else if ( this.segments[i].type == "Bezier3" )
+					{
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c1.getClone() : this.segments[i].c1 );
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c2.getClone() : this.segments[i].c2 );
+					}
+					rightPath.addPoint( clonePoints ? this.segments[i].p2.getClone() : this.segments[i].p2 );
+				} else if ( t_sub == 1 )
+				{
+					leftPath.addPoint( clonePoints ? this.segments[i].p1.getClone() : this.segments[i].p1 );
+						
+					if ( this.segments[i].type == "Bezier2" )
+					{
+						leftPath.addControlPoint( clonePoints ? this.segments[i].c.getClone() : this.segments[i].c );
+					} else if ( this.segments[i].type == "Bezier3" )
+					{
+						leftPath.addControlPoint( clonePoints ? this.segments[i].c1.getClone() : this.segments[i].c1 );
+						leftPath.addControlPoint( clonePoints ? this.segments[i].c2.getClone() : this.segments[i].c2 );
+						
+					}
+					leftPath.addPoint( clonePoints ? this.segments[i].p2.getClone() :  this.segments[i].p2 );
+					rightPath.addPoint( clonePoints ? this.segments[i].p2.getClone() : this.segments[i].p2 );
+				} else {
+					if ( this.segments[i].type == "LineSegment" )
+					{
+						var lineParts = this.segments[i].getSplitAtT( t_sub, clonePoints );
+						leftPath.addPoint( lineParts[0].p1 );
+						leftPath.addPoint( lineParts[0].p2 );
+						
+						rightPath.addPoint( lineParts[1].p1 );
+						rightPath.addPoint( lineParts[1].p2 );
+					} else if ( this.segments[i].type == "Bezier2" )
+					{
+						var bez2Parts = this.segments[i].getSplitAtT( t_sub, clonePoints );
+						leftPath.addPoint( bez2Parts[0].p1 );
+						leftPath.addControlPoint( bez2Parts[0].c );
+						leftPath.addPoint( bez2Parts[0].p2 );
+						
+						rightPath.addPoint( bez2Parts[1].p1 );
+						rightPath.addControlPoint( bez2Parts[1].c );
+						rightPath.addPoint( bez2Parts[1].p2 );
+					} else if ( this.segments[i].type == "Bezier3" )
+					{
+						var bez3Parts = this.segments[i].getSplitAtT( t_sub, clonePoints );
+						leftPath.addPoint( bez3Parts[0].p1 );
+						leftPath.addControlPoint( bez3Parts[0].c1 );
+						leftPath.addControlPoint( bez3Parts[0].c2 );
+						leftPath.addPoint( bez3Parts[0].p2 );
+						
+						rightPath.addPoint( bez3Parts[1].p1 );
+						rightPath.addControlPoint( bez3Parts[1].c1 );
+						rightPath.addControlPoint( bez3Parts[1].c2 );
+						rightPath.addControlPoint( bez3Parts[1].p2 );
+					}
+				}
+					
+				while ( ++i < this.segments.length )
+				{
+					if ( this.segments[i].type == "Bezier2" )
+					{
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c.getClone() : this.segments[i].c );
+					} else if ( this.segments[i].type == "Bezier3" )
+					{
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c1.getClone() : this.segments[i].c1 );
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c2.getClone() : this.segments[i].c2 );
+					}
+					rightPath.addPoint( clonePoints ? this.segments[i].p2.getClone() : this.segments[i].p2 );
+				}
+				
+				leftPath.closed = false;
+				rightPath.closed = false;
+				result.push ( leftPath, rightPath );
+				return result;
+				
+			} else {
+				leftPath.addPoint( clonePoints ? this.segments[i].p1.getClone() : this.segments[i].p1 );
+				if ( this.segments[i].type == "Bezier2" )
+				{
+					leftPath.addControlPoint( clonePoints ? this.segments[i].c.getClone() : this.segments[i].c );
+				} else if ( this.segments[i].type == "Bezier3" )
+				{
+					leftPath.addControlPoint( clonePoints ? this.segments[i].c1.getClone() : this.segments[i].c1 );
+					leftPath.addControlPoint( clonePoints ? this.segments[i].c2.getClone() : this.segments[i].c2 );
+				}
+			}
+			last_t = this.t_toSegments[i];
+		}
+		
+		return result;
+	}
+	
+	p.draw = function( g )
+	{
+		if ( this.dirty ) this.updateSegments();
+		
+		if (this.isValid)
+		{
+			this.segments[0].moveToStart( g );
+			for (var i = 0; i < this.segments.length; i++ )
+			{
+				this.segments[i].drawTo( g );
+			}
+			
+		}
+	}
+	
+	p.drawExtras = function( g, factor   )
+	{
+		if ( this.dirty ) this.updateSegments();
+		
+		if (this.isValid)
+		{
+			for (var i = 0; i<this.segments.length; i++)
+			{
+				if ( this.segments[i].type != "LineSegment" )
+				{
+					this.segments[i].drawExtras( g, factor || 1);
+				}
+			}
+			
+		}
+		
+		for ( i = 0; i< this.points.length; i++)
+		{
+			if ( this.points[i].isControlPoint )
+			{
+				this.points[i].drawCircle(g,3);
+			} else {
+				this.points[i].drawRect(g,3);
+			}
+		}
+	}
+	
+	p.export = function( g )
+	{
+		if ( this.dirty ) this.updateSegments();
+		
+		if (this.isValid)
+		{
+			this.segments[0].exportMoveToStart( g );
+			for (var i = 0; i < this.segments.length; i++ )
+			{
+				this.segments[i].exportDrawTo( g );
+			}
+		}
+	}
+	
+	p.getSplitsAtTs = function( t, clonePoints  )
+	{
+		if ( clonePoints == null ) clonePoints = true;
+		
+		t.sort( function( a, b ){ return ( a < b ? -1 : ( a > b ? 1 : 0))});
+		
+		var current = this;
+		var last_t = 0;
+		var result = [];
+		for ( var i = 0; i < t.length; i++ )
+		{
+			var parts = current.getSplitAtT( (t[i] - last_t) / ( 1 - last_t ), clonePoints );
+			if ( parts.length > 0 )
+			{
+				result.push( parts[0] );
+				current = ( parts.length == 2 ? parts[1] : parts[0] );
+			}
+			last_t = t[i];
+		}
+		
+		if ( parts.length == 2  ) result.push( parts[1] );
+		if ( closed && result.length > 1 )
+		{
+			var p1 = result.shift();
+			result[ result.length - 1 ].appendPath( p1 );
+		}
+		return result;
+	}
+	
+	p.getArea = function( precision )
+	{
+		return this.toPolygon(precision || 3).area;
+	}
+	
+	p.get_obb = function( precision )
+	{
+		return toPolygon(precision || 3).get_obb();
+	}
+	
+	p.toString = function()
+	{
+		var result = [];
+		for ( var i = 0;i<this.points.length;i++)
+		{
+			result[i] = this.points[i].toString();
+		}
+		return (this._closed ? "closed":"open") + ";" + result.join(",");
+	}
+	
+	qlib.MixedPath = MixedPath;
+}());
