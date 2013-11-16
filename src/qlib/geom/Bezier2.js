@@ -53,27 +53,34 @@ this.qlib = this.qlib||{};
 	*/
 	p.initialize = function( args ) {
 		var i = 0;
-		if ( typeof args[0] == "number" )
-		{	
-			this.p1 = new qlib.Vector2( args[0], args[1] );
-			i += 2;
+		if ( args.length == 0 )
+		{
+			this.p1 = new qlib.Vector2();
+			this.p2 = new qlib.Vector2();
+			this.c = new qlib.Vector2();
 		} else {
-			this.p1 = args[0];
-			i++;
-		}
-		if ( typeof args[i] == "number" )
-		{	
-			this.c = new qlib.Vector2( args[i], args[i+1] );
-			i += 2;
-		} else {
-			this.c = args[i];
-			i++;
-		}
-		if ( typeof args[i] == "number" )
-		{	
-			this.p2 = new qlib.Vector2( args[i], args[i+1] );
-		} else {
-			this.p2 = args[i];
+			if ( typeof args[0] == "number" )
+			{	
+				this.p1 = new qlib.Vector2( args[0], args[1] );
+				i += 2;
+			} else {
+				this.p1 = args[0];
+				i++;
+			}
+			if ( typeof args[i] == "number" )
+			{	
+				this.c = new qlib.Vector2( args[i], args[i+1] );
+				i += 2;
+			} else {
+				this.c = args[i];
+				i++;
+			}
+			if ( typeof args[i] == "number" )
+			{	
+				this.p2 = new qlib.Vector2( args[i], args[i+1] );
+			} else {
+				this.p2 = args[i];
+			}
 		}
 		this.dirty = true;
 	}

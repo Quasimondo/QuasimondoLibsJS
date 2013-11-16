@@ -48,7 +48,11 @@ this.qlib = this.qlib || {};
 	*/
 	p.initialize = function( args ) 
 	{
-		if ( typeof args[0] === "number" )
+		if ( args.length == 0 )
+		{ 
+			this.p1 = new qlib.Vector2();
+			this.p2 = new qlib.Vector2();
+		} else if ( typeof args[0] === "number" )
 		{	
 			this.p1 = new qlib.Vector2( args[0], args[1] );
 			if ( typeof args[2] === "number" )
