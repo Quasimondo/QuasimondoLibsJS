@@ -52,6 +52,8 @@ this.qlib = this.qlib||{};
 	Polygon.CW = "CW";
 	Polygon.DEGENERATE = "DEGENERATE";
 	Polygon.CACHE_SIZE = 200;
+	Polygon.SNAP_DISTANCE = 0.00000001;
+	Polygon.TREE_BALANCE_TRIGGER = 20;
 	
 	Polygon.fromArray = function( points, clonePoints )
 	{
@@ -150,16 +152,19 @@ this.qlib = this.qlib||{};
 		this.dirty = true;
 		this.points.push( p );
 		this.tree.insert( p );
+		this.rebalanceTree();
+		return p;
 	}
 	
 	p.treeDistance = function(a, b){
-	  return Math.pow(a.x - b.x, 2) +  Math.pow(a.y - b.y, 2);
+	  var d;
+	  return (d = (a.x - b.x) ) * d + ( d = (a.y - b.y)) * d;
 	}
 
 	
 	p.fixIndex = function( index )
 	{
-		return (((index % (this.points.length+1)) + (this.points.length+1))% (this.points.length+1)) | 0;
+		return (((index % this.points.length) + this.points.length)% this.points.length) | 0;
 	}
 	
 	p.addPointAt = function( index, p )
@@ -169,6 +174,8 @@ this.qlib = this.qlib||{};
 		index = this.fixIndex(index);
 		this.points.splice(index+1,0,p);
 		this.tree.insert( p );
+		this.rebalanceTree();
+		return p;
 	}
 	
 	p.removePointAt = function( index )
@@ -178,17 +185,28 @@ this.qlib = this.qlib||{};
 		var p = this.points[index];
 		this.tree.remove( p );
 		this.points.splice(index,1);
-		
+		this.rebalanceTree();
+		return p;
 	}
 	
-	function updatePointInTreeAt( index )
+	p.updatePointInTreeAt = function( index )
 	{
-		index = this.fixIndex(index);
-		var p = this.points[index];
+		var p = this.getPointAt(index);
 		this.tree.remove( p );
 		this.tree.insert( p );
+		this.dirty = true;
+		this.rebalanceTree();
 	}
 	
+	p.rebalanceTree = function()
+	{
+		var b =  this.tree.balanceFactor() ;
+		if ( b != Number.POSITIVE_INFINITY && b > Polygon.TREE_BALANCE_TRIGGER )
+		{
+			this.tree = new qlib.KDTree(this.points.concat(), this.treeDistance, ["x", "y"]);
+		}
+		
+	}
 	
 	p.getPointAt = function( index )
 	{
@@ -290,20 +308,7 @@ this.qlib = this.qlib||{};
 	p.hasPoint = function( p )
 	{
 		var nearest = this.tree.nearest({ x:p.x, y: p.y }, 1);
-		return nearest != null && p.squaredDistanceToVector( nearest.point ) < Polygon.SNAP_DISTANCE * Polygon.SNAP_DISTANCE;
-	}
-	
-	p.getIndexOfPoint = function( p )
-	{
-		var nearest = this.tree.nearest({ x:p.x, y: p.y }, 1);
-		if (  nearest != null && p.squaredDistanceToVector( nearest.point ) < Polygon.SNAP_DISTANCE * Polygon.SNAP_DISTANCE )
-		{
-			for ( var i = this.points.length; --i>-1;)
-			{
-				if ( this.points[i] == nearest.point ) return i;
-			}
-		}
-		return -1;
+		return nearest != null && nearest[0][1] < Polygon.SNAP_DISTANCE * Polygon.SNAP_DISTANCE;
 	}
 	
 	p.getIndexOfCorner = function( p )
@@ -498,12 +503,6 @@ this.qlib = this.qlib||{};
 		return closest;
 	}
 	
-	 p.getClosestCorner = function( p )
-	{
-		if ( this.pointCount == 0 ) return null;
-		var nearest = this.tree.nearest({ x:p.x, y: p.y }, 1);
-		return nearest.point;
-	}
 	
 	 p.distanceToVector2 = function( p )
 	{
@@ -522,11 +521,18 @@ this.qlib = this.qlib||{};
 		return Math.sqrt( minDist);
 	}
 	
-	 p.getClosestIndexToClosestPoint = function( p )
+	p.getClosestCorner = function( p )
+	{
+		if ( this.pointCount == 0 ) return null;
+		var nearest = this.tree.nearest( p, 1);
+		return ( nearest != null ? nearest[0][0] : null );
+	}
+	
+	p.getClosestCornerIndex = function( p )
 	{
 		if ( this.pointCount == 0 ) return -1;
-		var nearest = this.tree.nearest({ x:p.x, y: p.y }, 1);
-		return this.getIndexOfPoint( nearest.point );
+		var nearest = this.tree.nearest( p, 1);
+		return ( nearest != null ?  this.getIndexOfCorner(nearest[0][0]) : -1 );
 	}
 	
 	p.subdivide = function( maxSegmentLength )
@@ -591,19 +597,6 @@ this.qlib = this.qlib||{};
 			} 
 		}
 		return shortest;
-	}
-	
-	 p.getClosestIndex = function( p )
-	{
-		var nearest = this.tree.nearest({ x:p.x, y: p.y }, 1);
-		if (  nearest != null )
-		{
-			for ( var i = this.points.length; --i>-1;)
-			{
-				if ( this.points[i] == nearest.point ) return i;
-			}
-		}
-		return -1;
 	}
 	
 	
@@ -708,7 +701,7 @@ this.qlib = this.qlib||{};
 	
 	 p.updateDistanceTree = function()
 	{
-		this.tree = new qlib.KDTree(this.points, this.treeDistance, ["x", "y"]);
+		this.tree = new qlib.KDTree(this.points.concat(), this.treeDistance, ["x", "y"]);
 	}
 	
 	 p.updateClassification = function()
@@ -902,7 +895,7 @@ this.qlib = this.qlib||{};
 	}
 	
 	
-	 p.getLinearPathSegment = function( startIndex, endIndex, clonePoints = true )
+	 p.getLinearPathSegment = function( startIndex, endIndex, clonePoints )
 	{
 		if ( clonePoints == null ) clonePoints = true;
 		endIndex = this.fixIndex(endIndex);
@@ -944,7 +937,7 @@ this.qlib = this.qlib||{};
 		return this;
 	}
 	
-	p.rotate = function( angle, center = null )
+	p.rotate = function( angle, center )
 	{
 		if ( center == null ) center = this.centroid;
 		for ( var i = 0; i < this.points.length; i++ )
@@ -1118,7 +1111,7 @@ this.qlib = this.qlib||{};
 	p.setPoints = function( points )
 	{
 		this.points = points;
-		this.tree = new qlib.KDTree(this.points, this.treeDistance, ["x", "y"]);
+		this.tree = new qlib.KDTree(this.points.concat(), this.treeDistance, ["x", "y"]);
 		this.dirty = true;
 	}
 	

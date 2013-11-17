@@ -270,7 +270,20 @@ var p = Vector2.prototype;
 	
 	p.cornerAngle = function( v1, v2 )
 	{
+		if ( v1 == null || v2 == null )
+		{
+			throw("Vector2.cornerAngle needs two vectors");
+		}
 		return v1.getMinus(this).angleBetween( v2.getMinus(this) );
+	}
+	
+	p.windingDirection = function( p0, p1 )
+	{
+		var result = (p0.x - p1.x) * (p1.y - this.y) - (p0.y - p1.y) * (p1.x - this.x);
+		if (result < 0) return -1;	
+		if (result > 0) return  1;	
+		return 0;
+		
 	}
 	
 	p.reset = function( )

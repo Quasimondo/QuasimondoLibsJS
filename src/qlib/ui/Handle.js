@@ -77,35 +77,6 @@ this.qlib = this.qlib||{};
 		this.updateGrabber();
 	}
 	
-	
-	/*
-	p.onMouseMove = function( evt )
-	{
-		var o = evt.target;
-		o.point.x = o.x = evt.stageX + o.offset.x;
-		o.point.y = o.y = evt.stageY + o.offset.y;
-		o.dispatchEvent(  new qlib.Event( "change", o ) );
-	}
-	
-	p.onMouseUp = function( evt )
-	{
-		var o = evt.target;
-		o.mouseIsDown = false;
-		o.updateGrabber();
-	}
-	
-	p.onMouseDown = function( evt )
-	{
-		var o = evt.target;
-		o.offset = {x:o.x-evt.stageX, y:o.y-evt.stageY};
-		o.mouseIsDown = true;
-		o.selected = !o.selected;
-		// add a listener to the event object's mouseMove event
-		// this will be active until the user releases the mouse button:
-		evt.addEventListener("mousemove", function( evt){ o.onMouseMove( evt) });
-		evt.addEventListener("mouseup",  function( evt){ o.onMouseUp( evt) } );
-	}
-	*/
 	p.setActive = function( value )
 	{
 		this.active = value;
@@ -123,8 +94,10 @@ this.qlib = this.qlib||{};
 				// add a listener to the event object's mouseMove event
 				// this will be active until the user releases the mouse button:
 				evt.addEventListener("mousemove", function(ev) {
-					o.point.x =o.x = ev.stageX+offset.x;
-					o.point.y =o.y = ev.stageY+offset.y;
+					o.lastOffset = { x: (ev.stageX+offset.x) -  o.point.x, y: ( ev.stageY+offset.y) - o.point.y};
+					o.point.x = o.x = ev.stageX+offset.x;
+					o.point.y = o.y = ev.stageY+offset.y;
+					
 					o.dispatchEvent(  new qlib.Event( "change", o ) );
 					// indicate that the stage should be updated on the next tick:
 					
@@ -186,6 +159,12 @@ this.qlib = this.qlib||{};
 		this.point.y =  p.y;
 		this.x = Math.round( p.x );
 		this.y = Math.round( p.y );
+	}
+	
+	p.updatePositionFromPoint = function( )
+	{
+		this.x = Math.round( this.point.x );
+		this.y = Math.round( this.point.y );
 	}
 		
 	p.setPoint = function( p )
