@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>QuasimondoLibsJS Demo: Crossdominator</title>
+	
+	<link href="assets/demoStyles.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/Crossdominator.js"></script>
+	<script type="text/javascript" >
+		function init()
+		{
+			var scope = this;
+			document.getElementById("loadButton").onclick= function(){
+			
+				//For the demo it is necessary to create a new canvas element
+				//since loading an image without Crossdominator will taint the canvas
+				//and make it inaccessible for further operations:
+				var el = document.getElementById( 'demoCanvas' );
+				if(el) el.parentNode.removeChild( el );
+				
+				var cv = document.createElement('canvas');
+				cv.id = "demoCanvas";
+				document.getElementById('resultHolder').appendChild(cv);
+				// Arguments are: 
+				// url of the image to load
+				// id of the canvas element that will receive the image pixels
+				// optional callback object and callback method for the complete event
+				scope.loadCrossdomainURL( document.getElementById('imageURL').value, 'demoCanvas', scope, scope.onImageReady)
+			}
+			
+			document.getElementById("failButton").onclick= function(){
+			
+				var el = document.getElementById( 'demoCanvas' );
+				if(el) el.parentNode.removeChild( el );
+				
+				var cv = document.createElement('canvas');
+				cv.id = "demoCanvas";
+				document.getElementById('resultHolder').appendChild(cv);
+				
+				var img = document.createElement("img");
+				img.onload = function(){
+					var cvs=document.getElementById("demoCanvas");
+					var ctx=cvs.getContext("2d");
+					ctx.drawImage(this,0,0);
+					
+					scope.onImageReady();
+				}
+				img.setAttribute('src', document.getElementById('imageURL').value);
+			}
+		}
+	
+		function onImageReady()
+		{
+			var cvs = document.getElementById("demoCanvas");
+			var ctx = cvs.getContext("2d");
+			
+			//This is where this difference lies - usually the security sandbox
+			//prevents you to access the pixels from bitmaps that have been
+			//loaded from a different domain than the one the html page is hosted
+			//not so with the Crossdominator ;-)
+			try
+			{
+				var imgData=ctx.getImageData(0,0,cvs.width,cvs.height);
+			} catch( error )
+			{
+				alert(error.toString());
+			}
+			var iData = imgData.data;
+			for (var i=iData.length;i>-1;i-=4)
+			{
+			  if ( ((i >> 2) % cvs.width) < (cvs.width >> 1) )
+			  {
+				iData[i]^=255;iData[i+1]^=255;iData[i+2]^=255;
+			  }
+			}
+			ctx.putImageData(imgData,0,0);
+		}
+	</script>
+</head>
+<body onload="init()">
+
+	<header id="header" class="EaselJS">
+	    <h1><span class="text-product"><strong>QuasimondoLibs</strong> Demo:</span></h1>
+	    <p>Crossdominator</p>
+	</header>
+	<div style="padding:8px; width:500px;">
+	<p>You might have run into this issue: you want to manipulate the pixels of images in canvas, but once you try this with images that come from domains other than the one the page is hosted the security sandbox prevents you to do that. One solution to this problem is to load all images through a proxy on your server first. This has the downside that you have to pay for the extra traffic caused by this.<p>
+	<p>Thanks to a bug in the Adobe Flash player this can currently be avoided by creating a proxy on the client side. <a href="https://github.com/Quasimondo/QuasimondoLibsJS/tree/master/demos">Crossdominator</a> is a tiny Flash file and a bit of Javascript that allow you to load images from any domain and not get bothered by the security sandbox.</p>
+	<p>This demo is really more like a proof-of-concept, since I expect Adobe to plug that hole any time soon. And obviously since Flash is required this trick will not work on your mobile.</p>
+	<p>The credits for the discovery of this loophole go to <a href="https://twitter.com/makc3d">@makc</a></p>
+	<p>Ping me on twitter if you have questions or ideas for improvements: <a href="https://twitter.com/Quasimondo">@Quasimondo</a>
+	<p>In this demo you can load an image from any url. To show that pixel access is possible the left half will be inverted.</p>
+	<p>
+	<div>Enter an image URL: <input type="text" id="imageURL" value="http://37.media.tumblr.com/76ee3fc172208a782b0ddd0dd56b1500/tumblr_my1rw0Xwci1r6mzh8o1_500.jpg" style="width:400px;"/>
+	<button id="loadButton">Load Image with Crossdominator</button>
+	<button id="failButton">Load Image without Crossdominator</button></div>
+	<div id="resultHolder"></div>
+	</div>
+	<div><object data="assets/Crossdominator.swf" type="application/x-shockwave-flash" width="1" height="1" id="Crossdominator" name="Crossdominator">
+	 <param name="movie" value="assets/Crossdominator.swf"/>
+	<param name="allowScriptAccess" value="always" />
+	</object></div>	 
+</body>
+</html>
