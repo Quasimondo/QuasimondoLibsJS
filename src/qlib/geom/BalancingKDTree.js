@@ -29,11 +29,11 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
-	qlib.KDTreeNode = function() {
+	qlib["KDTreeNode"] = function() {
 	  this.count = 1;
 	}
 
@@ -99,7 +99,7 @@ this.qlib = this.qlib||{};
 			this.firstNode.point = collector[0];
 		} else {
 			node.parent.count--;
-			this,getPoints( node.parent.parent, node, collector );
+			this.getPoints( node.parent.parent, node, collector );
 			this.buildDepth( collector, node.parent.parent, node.parent.parent.depth );
 			if ( rebalance ) this.checkNodeBalanceBottomUp( minRatio, node.parent.parent, null );
 		}
@@ -333,11 +333,11 @@ this.qlib = this.qlib||{};
 		} else if ( node.right )
 		{
 			return this.findNearestForNode( point, node.right )
-		} else {
-			node.dist = node.point.squaredDistanceToVector( point )
-			return node;
 		}
-		return null;
+		
+		node.dist = node.point.squaredDistanceToVector( point )
+		return node;
+		
 	}
 		
 		
@@ -427,6 +427,6 @@ this.qlib = this.qlib||{};
 	}
 	
 	
-	qlib.BalancingKDTree = BalancingKDTree;
+	qlib["BalancingKDTree"] = BalancingKDTree;
 }());
 

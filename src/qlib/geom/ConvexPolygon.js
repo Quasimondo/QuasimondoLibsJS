@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 
 (function() {
@@ -176,7 +176,7 @@ ConvexPolygon.fromArray = function( points )
 		
 		if (minmax != minmin ) 
 		{
-			result[int(++top)] = p_minmin;
+			result[++top] = p_minmin;
 		}
 		
 		this.points = result.slice( 0, top );
@@ -302,7 +302,7 @@ ConvexPolygon.fromArray = function( points )
 		} 
 	}
 
-qlib.ConvexPolygon = ConvexPolygon;
+	qlib["ConvexPolygon"] = ConvexPolygon;
 }());
 	/*
 	public class ConvexPolygon extends GeometricShape implements IIntersectable, ICountable

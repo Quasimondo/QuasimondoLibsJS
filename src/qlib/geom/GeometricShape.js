@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -56,13 +56,11 @@ var p = GeometricShape.prototype;
 	p.scale = function( factorX, factorY, center )
 	{
 		throw("scale() not implented yet in "+this.type);
-		return null;
 	}
 	
 	p.clone = function( deepClone )
 	{
 		throw("clone() not implented yet in "+this.type);
-		return null;
 	}
 	
 	
@@ -75,5 +73,5 @@ var p = GeometricShape.prototype;
 		return this.type;
 	}
 	
-qlib.GeometricShape = GeometricShape;
+	qlib["GeometricShape"] = GeometricShape;
 }());

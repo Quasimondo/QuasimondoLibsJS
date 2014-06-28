@@ -1,7 +1,10 @@
 /*
-* TriangleUtils
+* Park-Miller-Carta Pseudo-Random Number Generator
 *
-* Copyright (c) 2013 Mario Klingemann
+* Original code by Peter Nitsch - https://github.com/pnitsch/BitmapData.js
+* HTML5 Canvas API implementation of the AS3 BitmapData class. 
+*
+* adapted and augmented by Mario Klingemann for qlib
 * 
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -30,30 +33,17 @@ window["qlib"] = window.qlib || {};
 
 (function() {
 
-	var TriangleUtils = function() {}
-	
-	TriangleUtils.getCenteredTriangle = function( center, leftLength, rightLength, bottomLength, angle  )
+	var PRNG = function() 
 	{
-		angle = ( angle == null ? angle : 0 );
-		var alpha = - Math.acos( ( leftLength * leftLength - rightLength * rightLength + bottomLength * bottomLength ) / ( 2 * leftLength * bottomLength) );
-		if ( isNaN( alpha )) return null;
-		
-		var v1 = new qlib.Vector2(0,0);
-		var v2 = new qlib.Vector2(bottomLength,0 );
-		var v3 = new qlib.Vector2( Math.cos( alpha ) * leftLength, Math.sin( alpha ) * leftLength );
-		
-		var triangle = new qlib.Triangle( v1, v2, v3 );
-		var ctr = triangle.centerOfMass();
-		if ( angle != 0 ) triangle.rotate( angle );
-		triangle.translate( center.getMinus( ctr ) );
-		return triangle;
-	}
-		
-	TriangleUtils.getEquilateralTriangle = function( pa, pb, flipped )
-	{
-		flipped = ( flipped == 0 ? false : flipped );
-		return new qlib.Triangle( pa, pb, new qlib.Vector2( pa.getAddCartesian(pa.angleTo(pb) +  Math.PI / 3 * ( flipped ? -1 : 1), pa.distanceToVector( pb ))) );
-	}
+		this.seed = 1;
+	};
 	
-	qlib["TriangleUtils"] = TriangleUtils;
+	var p = PRNG.prototype; 
+
+	p.next = function() { return (this.gen() / 2147483647); }; 
+	p.nextRange = function(min, max)	{ return min + ((max - min) * this.next()) };
+	p.gen = function() { return this.seed = (this.seed * 16807) % 2147483647; };
+	
+	qlib["PRNG"] = PRNG;
+
 }());

@@ -26,12 +26,12 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
 var Intersection = function() {
-	this.status = Intersection.NO_INTERSECTION;
+	this.status = qlib.Intersection.NO_INTERSECTION;
 	this.points = [];
 }
 
@@ -51,136 +51,156 @@ Intersection.intersect = function( shape1, shape2 )
 	switch(  shape1.type + shape2.type )
 	{
 		case "CircleCircle":
-			return new Intersection().circle_circle( shape1, shape2 );
+			return new qlib.Intersection().circle_circle( shape1, shape2 );
 			break;
 		case "Bezier2Bezier2":
-			return new Intersection().bezier2_bezier2( shape1, shape2 );
+			return new qlib.Intersection().bezier2_bezier2( shape1, shape2 );
 		break;
 		case "Bezier2LineSegment":
-			return new Intersection().bezier2_line( shape1, shape2 );
+			return new qlib.Intersection().bezier2_line( shape1, shape2 );
 		break;
 		case "LineSegmentBezier2":
-			return new Intersection().bezier2_line( shape2, shape1 );
+			return new qlib.Intersection().bezier2_line( shape2, shape1 );
 		break;
 		case "Bezier2Ellipse":
-			return new Intersection().bezier2_ellipse( shape1, shape2 );
+			return new qlib.Intersection().bezier2_ellipse( shape1, shape2 );
 		break;
 		case "EllipseBezier2":
-			return new Intersection().bezier2_ellipse( shape2, shape1 );
+			return new qlib.Intersection().bezier2_ellipse( shape2, shape1 );
 		break;
 		case "LineSegmentLineSegment":
-			return new Intersection().line_line( shape1, shape2 );
+			return new qlib.Intersection().line_line( shape1, shape2 );
 		break;
 		case "EllipseLineSegment":
-			return new Intersection().ellipse_line( shape1, shape2 );
+			return new qlib.Intersection().ellipse_line( shape1, shape2 );
 		break;
 		case "LineSegmentEllipse":
-			return new Intersection().ellipse_line( shape2, shape1 );
+			return new qlib.Intersection().ellipse_line( shape2, shape1 );
 		break;
 		case "EllipseEllipse":
-			return new Intersection().ellipse_ellipse( shape1, shape2 );
+			return new qlib.Intersection().ellipse_ellipse( shape1, shape2 );
 		break;
 		case "CircleLineSegment":
-			return new Intersection().circle_line( shape1, shape2 );
+			return new qlib.Intersection().circle_line( shape1, shape2 );
 			break;
 		case "LineSegmentCircle":
-			return new Intersection().circle_line( shape2, shape1 );
+			return new qlib.Intersection().circle_line( shape2, shape1 );
 			break;
 		case "Bezier2Bezier3":
-			return new Intersection().bezier2_bezier3( shape1, shape2 );
+			return new qlib.Intersection().bezier2_bezier3( shape1, shape2 );
 			break;
 		case "Bezier3Bezier2":
-			return new Intersection().bezier2_bezier3( shape2, shape1 );
+			return new qlib.Intersection().bezier2_bezier3( shape2, shape1 );
 			break;
 		case "Bezier3Bezier3":
-			return new Intersection().bezier3_bezier3( shape2, shape1 );
+			return new qlib.Intersection().bezier3_bezier3( shape2, shape1 );
 			break;
 		case "Bezier3LineSegment":
-			return new Intersection().bezier3_line( shape1, shape2 );
+			return new qlib.Intersection().bezier3_line( shape1, shape2 );
 			break;
 		case "LineSegmentBezier3":
-			return new Intersection().bezier3_line( shape2, shape1 );
+			return new qlib.Intersection().bezier3_line( shape2, shape1 );
 			break;
 		case "TriangleLineSegment":
-			return new Intersection().line_triangle( shape2, shape1 );
+			return new qlib.Intersection().line_triangle( shape2, shape1 );
 			break;
 		case "LineSegmentTriangle":
-			return new Intersection().line_triangle( shape1, shape2 );
+			return new qlib.Intersection().line_triangle( shape1, shape2 );
 			break;
 		case "PolygonLineSegment":
-			return new Intersection().line_polygon( shape2, shape1 );
+			return new qlib.Intersection().line_polygon( shape2, shape1 );
 			break;
 		case "LineSegmentPolygon":
-			return new Intersection().line_polygon( shape1, shape2 );
+			return new qlib.Intersection().line_polygon( shape1, shape2 );
 			break;
 		case "ConvexPolygonLineSegment":
-			return new Intersection().line_convexPolygon( shape2, shape1 );
+			return new qlib.Intersection().line_convexPolygon( shape2, shape1 );
 			break;
 		case "ConvexPolygonConvexPolygon":
-			return new Intersection().convexPolygon_convexPolygon( shape2, shape1 );
+			return new qlib.Intersection().convexPolygon_convexPolygon( shape2, shape1 );
 			break;
 		case "LineSegmentConvexPolygon":
-			return new Intersection().line_convexPolygon( shape1, shape2 );
+			return new qlib.Intersection().line_convexPolygon( shape1, shape2 );
 			break;
 		case "LineSegmentMixedPath":
-			return new Intersection().line_mixedPath( shape1, shape2 );
+			return new qlib.Intersection().line_mixedPath( shape1, shape2 );
 			break;
 		case "MixedPathLineSegment":
-			return new Intersection().line_mixedPath(shape2, shape1 );
+			return new qlib.Intersection().line_mixedPath(shape2, shape1 );
 			break;
+		case "LineSegmentLinearPath":
+			return new qlib.Intersection().line_linearPath( shape1, shape2 );
+			break;
+		case "LinearPathLineSegment":
+			return new qlib.Intersection().line_linearPath(shape2, shape1 );
+			break;	
+			
+		case "Bezier2MixedPath":
+			return new qlib.Intersection().bezier2_mixedPath( shape1, shape2 );
+			break;
+		case "MixedPathBezier2":
+			return new qlib.Intersection().bezier2_mixedPath(shape2, shape1 );
+			break;
+		case "Bezier3MixedPath":
+			return new qlib.Intersection().bezier3_mixedPath( shape1, shape2 );
+			break;
+		case "MixedPathBezier3":
+			return new qlib.Intersection().bezier3_mixedPath(shape2, shape1 );
+			break;
+			
 		case "PolygonPolygon":
-			return new Intersection().polygon_polygon( shape2, shape1 );
+			return new qlib.Intersection().polygon_polygon( shape2, shape1 );
 			break;
 		case "ConvexPolygonPolygon":
-			return new Intersection().convexPolygon_polygon( shape1, shape2 );
+			return new qlib.Intersection().convexPolygon_polygon( shape1, shape2 );
 			break;
 		case "PolygonConvexPolygon":
-			return new Intersection().convexPolygon_polygon( shape2, shape1 );
+			return new qlib.Intersection().convexPolygon_polygon( shape2, shape1 );
 			break;
 		case "CompoundShapeLineSegment":
-			return new Intersection().compoundShape_line( shape1, shape2 );
+			return new qlib.Intersection().compoundShape_line( shape1, shape2 );
 			break;
 		case "LineSegmentCompoundShape":
-			return new Intersection().compoundShape_line( shape2, shape1 );
+			return new qlib.Intersection().compoundShape_line( shape2, shape1 );
 			break;
 		case "CompoundShapeTriangle":
-			return new Intersection().compoundShape_triangle( shape1, shape2 );
+			return new qlib.Intersection().compoundShape_triangle( shape1, shape2 );
 			break;
 		case "TriangleCompoundShape":
-			return new Intersection().compoundShape_triangle( shape2, shape1  );
+			return new qlib.Intersection().compoundShape_triangle( shape2, shape1  );
 			break;
 		case "CompoundShapePolygon":
-			return new Intersection().compoundShape_polygon( shape1, shape2 );
+			return new qlib.Intersection().compoundShape_polygon( shape1, shape2 );
 			break;
 		case "PolygonCompoundShape":
-			return new Intersection().compoundShape_polygon( shape2, shape1  );
+			return new qlib.Intersection().compoundShape_polygon( shape2, shape1  );
 			break;
 		case "CompoundShapeCompoundShape":
-			return new Intersection().compoundShape_compoundShape( shape1, shape2 );
+			return new qlib.Intersection().compoundShape_compoundShape( shape1, shape2 );
 			break;
 		case "GeometricCompositeLineSegment":
-			return new Intersection().geometricComposite_line( shape1, shape2 );
+			return new qlib.Intersection().geometricComposite_line( shape1, shape2 );
 			break;
 		case "LineSegmentGeometricComposite":
-			return new Intersection().geometricComposite_line( shape2, shape1 );
+			return new qlib.Intersection().geometricComposite_line( shape2, shape1 );
 			break;
 		case "PolygonTriangle":
-			return new Intersection().polygon_triangle( shape1, shape2  );
+			return new qlib.Intersection().polygon_triangle( shape1, shape2  );
 			break;
 		case "TrianglePolygon":
-			return new Intersection().polygon_triangle( shape2, shape1  );
+			return new qlib.Intersection().polygon_triangle( shape2, shape1  );
 			break;
 		case "ConvexPolygonCircle":
-			return new Intersection().circle_convexPolygon( shape2, shape1 );
+			return new qlib.Intersection().circle_convexPolygon( shape2, shape1 );
 			break;
 		case "CircleConvexPolygon":
-			return new Intersection().circle_convexPolygon( shape1, shape2 );
+			return new qlib.Intersection().circle_convexPolygon( shape1, shape2 );
 			break;
 		case "PolygonCircle":
-			return new Intersection().circle_polygon( shape2, shape1 );
+			return new qlib.Intersection().circle_polygon( shape2, shape1 );
 			break;
 		case "CirclePolygon":
-			return new Intersection().circle_polygon( shape1, shape2 );
+			return new qlib.Intersection().circle_polygon( shape1, shape2 );
 			break;
 	}
 	return null;
@@ -209,10 +229,10 @@ var p = Intersection.prototype;
 		
 		if (deter<0) 
 		{
-			status = Intersection.OUTSIDE;
+			status = qlib.Intersection.OUTSIDE;
 		} else if (deter == 0) 
 		{
-			status = Intersection.TANGENT;
+			status = qlib.Intersection.TANGENT;
 		} else 
 		{
 			var e = Math.sqrt(deter);
@@ -222,13 +242,13 @@ var p = Intersection.prototype;
 			{
 				if ((u1<0 && u2<0) || (u1>1 && u2>1)) 
 				{
-					status = Intersection.OUTSIDE;
+					status = qlib.Intersection.OUTSIDE;
 				} else {
-					status = Intersection.INSIDE;
+					status = qlib.Intersection.INSIDE;
 				}
 			} else 
 			{
-				status = Intersection.INTERSECTION;
+				status = qlib.Intersection.INTERSECTION;
 				if ((0<=u1 || !l.p1_end) && (u1<=1 || !l.p2_end)) 
 				{
 					this.appendPoint(l.p1.getLerp(l.p2, u1));
@@ -248,13 +268,13 @@ var p = Intersection.prototype;
 		var c_dist = c1.c.distanceToVector( c2.c );
 		
 		if (c_dist == 0 && r_min == 0) {
-			this.status = Intersection.COINCIDENT;
+			this.status = qlib.Intersection.COINCIDENT;
 		} else if (c_dist>r_max) {
-			this.status = Intersection.OUTSIDE;
+			this.status = qlib.Intersection.OUTSIDE;
 		} else if (c_dist<r_min) {
-			this.status = Intersection.INSIDE;
+			this.status = qlib.Intersection.INSIDE;
 		} else {
-			this.status = Intersection.INTERSECTION;
+			this.status = qlib.Intersection.INTERSECTION;
 			var a = (c1.r*c1.r-c2.r*c2.r+c_dist*c_dist)/(2*c_dist);
 			if ( a > c1.r ) a = c1.r;
 			var h = Math.sqrt(c1.r*c1.r-a*a);
@@ -333,7 +353,7 @@ var p = Intersection.prototype;
 
 
 		if ( this.points.length > 0 ) {
-			this.status = Intersection.INTERSECTION;
+			this.status = qlib.Intersection.INTERSECTION;
 		}
 		
 		return this;
@@ -415,7 +435,7 @@ var p = Intersection.prototype;
 		}
 		if ( this.points.length>0) 
 		{
-			this.status = Intersection.INTERSECTION;
+			this.status = qlib.Intersection.INTERSECTION;
 		}
 		return this;
 		*/
@@ -578,9 +598,94 @@ var p = Intersection.prototype;
 			
 		}
 		
-		if( this.points.length > 0 ) this.status = Intersection.INTERSECTION;
+		if( this.points.length > 0 ) this.status = qlib.Intersection.INTERSECTION;
 		return this;
 	};
+	
+	
+	 p.bezier3_line = function(b, l)
+	 { 
+		 var dy = l.p1.y-l.p2.y;
+		 var dx = l.p2.x-l.p1.x;
+		 var c3 = dy*(-b.p1.x+3*(b.c1.x-b.c2.x)+b.p2.x)+dx*(-b.p1.y+3*(b.c1.y-b.c2.y)+b.p2.y);
+		 var c2 = dy*3*(b.p1.x-2*b.c1.x+b.c2.x)+dx*3*(b.p1.y-2*b.c1.y+b.c2.y);
+		 var c1 = dy*3*(b.c1.x-b.p1.x)+dx*3*(b.c1.y-b.p1.y);
+		 var c0 = dy*b.p1.x+dx*b.p1.y+l.p1.x*l.p2.y-l.p2.x*l.p1.y;
+		 
+		 var pN = [];
+			
+		 var bb = c2/c3;
+		 var c = c1/c3;
+		 var d = c0/c3;
+		 var p = c-bb*bb/3
+		 var p3 = p*p*p/27;
+		 var q = 2*bb*bb*bb/27-bb*c/3+d
+		 var q2 = -q/2;
+		 var dis = q2*q2+p3;
+		 
+		 if (dis>0)
+		 { 
+			 var dd = Math.sqrt(dis);
+			 var ud = q2+dd;
+			 var u = ud<0 ? -Math.pow(-ud, 1/3) : Math.pow(ud, 1/3);
+			 var vd = q2-dd;
+			 var v = vd<0 ? -Math.pow(-vd, 1/3) : Math.pow(vd, 1/3);
+			 pN.push( (u+v)-bb/3 );
+		 } else if (dis == 0)
+		 { 
+			if (!p && !q) 
+				pN[0] = -bb/3;
+			else
+			{ 
+			 pN.push( Math.pow(-4*q, 1/3)-bb/3 );
+			 pN.push( Math.pow(q/2, 1/3)-bb/3);
+			}
+		} else if (dis<0)
+		{ 
+			 var a = Math.acos(q2/Math.sqrt(-p3))/3;
+			 var p2 = 2*Math.sqrt(-p/3);
+			 pN.push( p2*Math.cos(a)-bb/3);
+			 pN.push( p2*Math.cos(a+Math.PI*2/3)-bb/3);
+			 pN.push( p2*Math.cos(a-Math.PI*2/3)-bb/3);
+		}
+		 
+		 var t;
+		 var minmax = false;
+		 while ( (t = pN.pop()) != null )
+		 { 
+			 if (t>=0 && t<=1)
+			 { 
+				if ( !minmax)
+				{
+					var minx = Math.min(l.p1.x,l.p2.x);
+					var miny = Math.min(l.p1.y,l.p2.y);
+					var maxx = Math.max(l.p1.x,l.p2.x);
+					var maxy = Math.max(l.p1.y,l.p2.y);
+					minmax = true;
+				}
+			 
+				 var b4x = b.p1.x+t*(b.c1.x-b.p1.x);
+				 var b5x = b.c1.x+t*(b.c2.x-b.c1.x);
+				 var b7x = b4x+t*(b5x-b4x);
+				 var b6x = b.c2.x+t*(b.p2.x-b.c2.x);
+				 var b8x = b5x+t*(b6x-b5x);
+				 var b9x = b7x+t*(b8x-b7x);
+				 if (b9x>=minx &&  b9x<=maxx)
+				 {
+					 var b4y = b.p1.y+t*(b.c1.y-b.p1.y);
+					 var b5y = b.c1.y+t*(b.c2.y-b.c1.y);
+					 var b6y = b.c2.y+t*(b.p2.y-b.c2.y);
+					 var b7y = b4y+t*(b5y-b4y);
+					 var b8y = b5y+t*(b6y-b5y);
+					 var b9y = b7y+t*(b8y-b7y);
+					 if (b9y>=miny && b9y<=maxy) this.appendPoint(new qlib.Vector2(b9x,b9y));
+				 }
+			 } 
+		 }
+		 
+		 if ( this.points.length > 0 ) this.status = qlib.Intersection.INTERSECTION;
+		 return this;
+	 } 
 	
 	p.line_line = function( l1, l2)
 	{
@@ -602,13 +707,13 @@ var p = Intersection.prototype;
 			if (0<=ua && ua<=1 && 0<=ub && ub<=1) 
 			{
 				this.points[0] = new qlib.Vector2( l1.p1.x + ua * d5, l1.p1.y + ua * d6 );
-				this.status = Intersection.INTERSECTION;
+				this.status = qlib.Intersection.INTERSECTION;
 			} 
 		} else {
 			if (ua_t == 0 || ub_t == 0) {
-				this.status = Intersection.COINCIDENT;
+				this.status = qlib.Intersection.COINCIDENT;
 			} else {
-				this.status = Intersection.PARALLEL;
+				this.status = qlib.Intersection.PARALLEL;
 			}
 		}
 		return this;
@@ -620,11 +725,11 @@ var p = Intersection.prototype;
 		for ( var i = 0; i < p.pointCount; i++ )
 		{
 			intersection = l.intersect( p.getSide( i ) );
-			if ( intersection.status == Intersection.INTERSECTION )
+			if ( intersection.status == qlib.Intersection.INTERSECTION )
 			{
-				this.status = Intersection.INTERSECTION;
+				this.status = qlib.Intersection.INTERSECTION;
 				this.appendPoint( intersection.points[0] );
-			} else if ( this.status == Intersection.NO_INTERSECTION )
+			} else if ( this.status == qlib.Intersection.NO_INTERSECTION )
 			{
 				this.status = intersection.status;
 			}
@@ -639,15 +744,182 @@ var p = Intersection.prototype;
 		for ( var i = 0; i < 3; i++ )
 		{
 			intersection = l.intersect( t.getSide( i ) );
-			if ( intersection.status == Intersection.INTERSECTION )
+			if ( intersection.status == qlib.Intersection.INTERSECTION )
 			{
-				this.status = Intersection.INTERSECTION;
+				this.status = qlib.Intersection.INTERSECTION;
 				this.appendPoint( intersection.points[0] );
-			} else if ( this.status == Intersection.NO_INTERSECTION )
+			} else if ( this.status == qlib.Intersection.NO_INTERSECTION )
 			{
 				this.status = intersection.status;
 			}
 		}
+		return this;
+	}
+	
+	
+	p.line_mixedPath = function( l, p )
+	{
+		/*
+		var bounds = qlib.Polygon.fromRectangle( p.getBoundingRect( true ) );
+		var quickTest = bounds.intersect( l );
+		if ( quickTest.status == qlib.Intersection.NO_INTERSECTION )
+		{
+			this.status =  quickTest.status;
+			return this;
+		}
+		*/
+		var intersection;
+		for ( var i = 0; i < p.segmentCount; i++ )
+		{
+			intersection = l.intersect( p.getSegment( i ) );
+			if ( intersection.status == qlib.Intersection.INTERSECTION )
+			{
+				for ( var j = 0; j < intersection.points.length; j++ )
+				{
+					this.appendPoint( intersection.points[j]);
+				}
+			} 
+		}
+		if (this.points.length>0 ) this.status = qlib.Intersection.INTERSECTION;
+		return this;
+	}
+	
+	p.line_linearPath = function( l, p )
+	{
+		
+		var bounds = qlib.Polygon.fromRectangle( p.getBoundingRect( true ) );
+		var quickTest = bounds.intersect( l );
+		if ( quickTest.status == qlib.Intersection.NO_INTERSECTION )
+		{
+			this.status =  quickTest.status;
+			return this;
+		}
+		
+		var intersection;
+		for ( var i = 0; i < p.segmentCount; i++ )
+		{
+			intersection = l.intersect( p.getSegment( i ) );
+			if ( intersection.status == qlib.Intersection.INTERSECTION )
+			{
+				for ( var j = 0; j < intersection.points.length; j++ )
+				{
+					this.appendPoint( intersection.points[j]);
+				}
+			} 
+		}
+		if (this.points.length>0 ) this.status = qlib.Intersection.INTERSECTION;
+		return this;
+	}
+	
+	
+	p.bezier2_mixedPath = function( b, p )
+	{
+		var intersection;
+		for ( var i = 0; i < p.segmentCount; i++ )
+		{
+			intersection = b.intersect( p.getSegment( i ) );
+			if ( intersection.status == qlib.Intersection.INTERSECTION )
+			{
+				this.status = qlib.Intersection.INTERSECTION;
+				for ( var j = 0; j < intersection.points.length; j++ )
+				{
+					this.appendPoint( intersection.points[j]);
+				}
+			} else if ( this.status == qlib.Intersection.NO_INTERSECTION )
+			{
+				this.status = intersection.status;
+			}
+		}
+		return this;
+	}
+	
+	p.bezier3_mixedPath = function( b, p )
+	{
+		var intersection;
+		for ( var i = 0; i < p.segmentCount; i++ )
+		{
+			intersection = b.intersect( p.getSegment( i ) );
+			if ( intersection.status == qlib.Intersection.INTERSECTION )
+			{
+				this.status = qlib.Intersection.INTERSECTION;
+				for ( var j = 0; j < intersection.points.length; j++ )
+				{
+					this.appendPoint( intersection.points[j]);
+				}
+			} else if ( this.status == qlib.Intersection.NO_INTERSECTION )
+			{
+				this.status = intersection.status;
+			}
+		}
+		return this;
+	}
+	
+	p.bezier2_line = function( bz, l )
+	{ 
+		var min = l.p1.getMin(l.p2);
+		var max = l.p1.getMax(l.p2);
+		
+		var c2x = bz.p1.x -2 * bz.c.x + bz.p2.x;
+		var c2y = bz.p1.y -2 * bz.c.y + bz.p2.y;
+		
+		var c1x = -2 * bz.p1.x + 2 * bz.c.x;
+		var c1y = -2 * bz.p1.y + 2 * bz.c.y;
+		
+		var c0x = bz.p1.x;
+		var c0y = bz.p1.y;
+		
+		var nx = l.p1.y - l.p2.y;
+		var ny = l.p2.x - l.p1.x;
+		
+		var cl = l.p1.x * l.p2.y - l.p2.x * l.p1.y;
+		
+		var roots = new qlib.Polynomial([nx * c2x + ny * c2y,nx * c1x + ny * c1y,nx * c0x + ny * c0y + cl]).getRoots();
+		
+		/*
+		var pN:Vector.<Number> = new Vector.<Number>();
+		var p:Number = -c1/c2/2;
+		var d:Number = p*p-c0/c2;
+		if (d == 0) pN.push( p );
+		else if (d>0)
+		{ 
+			d = Math.sqrt(d);
+			pN.push(p-d,p+d);
+		}
+		*/
+		var t;
+		while ( ( t = roots.pop())!=null)
+		{
+			if (t>=0 && t<=1)
+			{ 
+				var b3x = bz.p1.x + t * ( bz.c.x - bz.p1.x )
+				var b3y = bz.p1.y + t * ( bz.c.y - bz.p1.y );
+				
+				var b4x = bz.c.x + t * ( bz.p2.x - bz.c.x)
+				var b4y = bz.c.y + t * ( bz.p2.y - bz.c.y);
+				
+				var b5x = b3x + t *( b4x - b3x );
+				var b5y = b3y + t *( b4y - b3y );
+				
+				
+				if(l.p1.x == l.p2.x)
+				{
+					if( min.y <= b5y && b5y <= max.y)
+					{
+						this.appendPoint(new qlib.Vector2(b5x,b5y));
+					}
+				}else if( l.p1.y == l.p1.y )
+				{
+					if( min.x <= b5x && b5x <= max.x )
+					{
+						this.appendPoint(new qlib.Vector2(b5x,b5y));
+					}
+				} else if( b5x>=min.x && b5x<=max.x && b5y>=min.y && b5y<=max.y)
+				{
+					this.appendPoint(new qlib.Vector2(b5x,b5y));
+				}
+			}
+		}
+		if ( this.points.length >0 ) this.status = Intersection.INTERSECTION;
 		return this;
 	}
 			
@@ -668,5 +940,5 @@ var p = Intersection.prototype;
 		return "Intersection: "+this.status;
 	}
 	
-qlib.Intersection = Intersection;
+	qlib["Intersection"] = Intersection;
 }());

@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -35,9 +35,13 @@ this.qlib = this.qlib||{};
 	  this.initialize(arguments);
 	}
 	
-	var p = Handle.prototype = new createjs.Container();
-	
 	Handle.colorScheme = ["#000","#888","#fff","#fff","#ff8000","#ffe000","#ffff00","#ffff00"];
+	
+	if ( window.createjs != null )
+		var p = Handle.prototype = new createjs.Container();
+	else
+		var p = Handle.prototype;
+		
 	
 	/**
 	 * @property DisplayObject_initialize
@@ -61,7 +65,7 @@ this.qlib = this.qlib||{};
 			//arguments: center
 			this.point = args[0];
 		}
-		this.grabber = new createjs.Shape();
+		this.grabber = (window.createjs != null ? new createjs.Shape() : {});
 		this.addChild( this.grabber );
 		
 		this.HANDLE_SIZE = 7;
@@ -183,5 +187,5 @@ this.qlib = this.qlib||{};
 		return "Handle";
 	}
 	
-qlib.Handle = Handle;
+	qlib["Handle"] = Handle;
 }());

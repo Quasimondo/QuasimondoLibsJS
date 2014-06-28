@@ -27,7 +27,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -76,7 +76,7 @@ var p = Event.prototype;
 	p.dispatchEvent = null;
 	p.hasEventListener = null;
 	p._listeners = null;
-	createjs.EventDispatcher.initialize(p); // inject EventDispatcher methods.
+	qlib.EventDispatcher.initialize(p); // inject EventDispatcher methods.
 
 // constructor:
 	/**
@@ -109,5 +109,5 @@ var p = Event.prototype;
 		return "[Event (type="+this.type+")]";
 	}
 
-qlib.Event = Event;
+	qlib["Event"] = Event;
 }());

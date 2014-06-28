@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -321,7 +321,7 @@ var p = Vector2.prototype;
 	p.getMirror = function( vector )
 	{
 		
-		return new Vector2( 2 * vector.x - this.x, 2 * vector.y - this.y );
+		return new qlib.Vector2( 2 * vector.x - this.x, 2 * vector.y - this.y );
 	}
 	
 	p.getProject = function( a, b )
@@ -497,36 +497,97 @@ var p = Vector2.prototype;
 		return (p1.x-p0.x)*(this.y-p0.y)-(this.x-p0.x)*(p1.y-p0.y);
 	}
 	
+	
+	p.min = function( v ) 
+	{
+		this.x = Math.min( this.x, v.x);
+		this.y = Math.min( this.y, v.y);
+		return this;
+	};
+		
+	p.minXY  = function( px, py ) 
+	{
+		this.x = Math.min( this.x, px);
+		this.y = Math.min( this.y, py);
+		return this;
+	};
+		
+	p.getMin = function( v ) 
+	{
+		return new qlib.Vector2(Math.min( this.x, v.x), Math.min(this.y, v.y));
+	};
+		
+	p.max = function( v ) 
+	{
+		this.x = Math.max( this.x, v.x);
+		this.y = Math.max( this.y, v.y);
+		return this;
+	};
+		
+	p.maxXY = function( px, py ) 
+	{
+		this.x = Math.max( this.x, px);
+		this.y = Math.max( this.y, py);
+		return this;
+	};
+		
+	p.getMax = function( v )
+	{
+		return new qlib.Vector2(Math.max( this.x, v.x), Math.max(this.y, v.y));
+	};
+	
+	
 	/**
 	 * Returns a clone of the Vector2 instance.
 	 * @method clone
 	 * @return {Vector2} a clone of the Vector2 instance.
 	 **/
 	p.clone = function() {
-		return new Vector2(this);
+		return new qlib.Vector2(this);
 	}
 
 	
-	p.draw = function( g, radius )
+	p.draw = function( g, radius, offset )
 	{
 		radius = ( radius == null ? 2 : radius );
-		g.moveTo(this.x-radius,this.y)
-		g.lineTo(this.x+radius,this.y);
-		g.moveTo(this.x,this.y-radius);
-		g.lineTo(this.x,this.y+radius);
+		if ( offset==null )
+		{
+			g.moveTo(this.x-radius,this.y)
+			g.lineTo(this.x+radius,this.y);
+			g.moveTo(this.x,this.y-radius);
+			g.lineTo(this.x,this.y+radius);
+		} else {
+			g.moveTo(this.x-radius+offset.x,this.y+offset.y)
+			g.lineTo(this.x+radius+offset.x,this.y+offset.y);
+			g.moveTo(this.x+offset.x,this.y-radius+offset.y);
+			g.lineTo(this.x+offset.x,this.y+radius+offset.y);
+		}
 	}
 		
-	p.drawCircle = function( g, radius )
+	p.drawCircle = function( g, radius, offset )
 	{
 		radius = ( radius == null ? 2 : radius );
-		g.drawRect(this.x-0.5,this.y-0.5,1,1);
-		g.drawCircle(this.x,this.y,radius);
+		if ( offset==null )
+		{
+			g.drawRect(this.x-0.5,this.y-0.5,1,1);
+			g.moveTo(this.x+radius,this.y);
+			g.drawCircle(this.x,this.y,radius);
+		} else {
+			g.drawRect(this.x-0.5+offset.x,this.y-0.5+offset.y,1,1);
+			g.moveTo(this.x+radius+offset.x,this.y+offset.y);
+			g.drawCircle(this.x+offset.x,this.y+offset.y,radius);
+		}
 	}
 		
-	p.drawRect = function( g, radius )
+	p.drawRect = function( g, radius, offset )
 	{
 		radius = ( radius == null ? 2 : radius );
-		g.drawRect(this.x-radius,this.y-radius,radius+radius,radius+radius);
+		if ( offset==null )
+		{
+			g.drawRect(this.x-radius,this.y-radius,radius+radius,radius+radius);
+		} else {
+			g.drawRect(this.x-radius+offset.x,this.y-radius+offset.y,radius+radius,radius+radius);
+		}
 	}
 	
 	
@@ -539,5 +600,5 @@ var p = Vector2.prototype;
 		return "[Vector2 (x="+this.x+" y="+this.y+")]";
 	}
 	
-qlib.Vector2 = Vector2;
+	qlib["Vector2"] = Vector2;
 }());

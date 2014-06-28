@@ -28,7 +28,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -454,5 +454,5 @@ this.qlib = this.qlib||{};
 		}
 	};
 		
-qlib.Polynomial = Polynomial;
+	qlib["Polynomial"] = Polynomial;
 }());

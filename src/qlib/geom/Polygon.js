@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -1048,36 +1048,32 @@ this.qlib = this.qlib||{};
 		}
 	}
 	
-	p.drawWithOffset = function( g, offset )
+	p.draw = function( g, offset )
 	{
 		if ( this.points.length > 0 )
 		{
-			g.moveTo( this.points[this.points.length-1].x + offset.x, this.points[this.points.length-1].y + offset.y);
-			for (var i=0; i < this.points.length; i++ )
+			if ( offset == null )
 			{
-				g.lineTo( this.points[i].x + offset.x, this.points[i].y + offset.y);
+				g.moveTo( this.points[this.points.length-1].x, this.points[this.points.length-1].y );
+				for (var i=0; i < this.points.length; i++ )
+				{
+					g.lineTo( this.points[i].x, this.points[i].y );
+				}
+			} else {
+				g.moveTo( this.points[this.points.length-1].x + offset.x, this.points[this.points.length-1].y + offset.y);
+				for (var i=0; i < this.points.length; i++ )
+				{
+					g.lineTo( this.points[i].x + offset.x, this.points[i].y + offset.y);
+				}
 			}
 		} 
 	}
 	
-	p.draw = function( g )
-	{
-		
-		if ( this.points.length > 0 )
-		{
-			g.moveTo( this.points[this.points.length-1].x, this.points[this.points.length-1].y );
-			for (var i=0; i < this.points.length; i++ )
-			{
-				g.lineTo( this.points[i].x, this.points[i].y );
-			}
-		} 
-	}
-	
-	p.drawExtras = function( g )
+	p.drawExtras = function( g, radius, offset )
 	{
 		for (var i=0; i < this.points.length; i++ )
 		{
-			this.points[i].draw(g);
+			this.points[i].draw(g, radius, offset);
 		}
 		
 	}
@@ -1306,6 +1302,20 @@ this.qlib = this.qlib||{};
 		
 	}
 	
+	p.toArray = function( deepClone )
+	{
+		if (!deepClone )
+		{
+			return this.points.concat();
+		} else {
+			var result = [];
+			for ( var i = 0; i < this.points.length; i++ )
+			{
+				result[i] =  this.points[i].clone();
+			}
+			return result;
+		}
+	}
 	
 	p.toString = function()
 	{
@@ -1337,5 +1347,5 @@ this.qlib = this.qlib||{};
 		
 	}
 	
-	qlib.Polygon = Polygon;
+	qlib["Polygon"] = Polygon;
 }());

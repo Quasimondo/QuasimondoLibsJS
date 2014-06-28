@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -120,6 +120,11 @@ var p = Rectangle.prototype = new qlib.GeometricShape();
 		
 	}
 	
+	p.getCenter = function()
+	{
+		return new qlib.Vector2( this.x + this.width*0.5, this.y + this.height*0.5);
+	}
+	
 	p.__defineGetter__("topLeft", function(){return new qlib.Point(this.x,this.y);});
 	
 // public methods:
@@ -146,5 +151,5 @@ var p = Rectangle.prototype = new qlib.GeometricShape();
 		return "qlib.Rectangle("+this.x+","+this.y+","+this.width+","+this.height+")";
 	}
 	
-qlib.Rectangle = Rectangle;
+	qlib["Rectangle"] = Rectangle;
 }());

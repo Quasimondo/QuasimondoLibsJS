@@ -1,4 +1,4 @@
-/*
+/**
 * The Point object represents a location in a two-dimensional coordinate system, where x represents the horizontal axis and y represents the vertical axis.
 * @constructor
 * @author Leandro Ferreira
@@ -30,7 +30,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -150,9 +150,7 @@ this.qlib = this.qlib||{};
 		return new qlib.Point(len * Math.cos(angle), len * Math.sin(angle));
 	}
 	
-	
-	
-	qlib.Point = Point;
+	qlib["Point"] = Point;
 
 }());
 

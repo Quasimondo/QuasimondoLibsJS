@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -147,5 +147,5 @@ this.qlib = this.qlib||{};
 		return "SteinerCircles";
 	}
 	
-qlib.SteinerCircles = SteinerCircles;
+	qlib["SteinerCircles"] = SteinerCircles;
 }());

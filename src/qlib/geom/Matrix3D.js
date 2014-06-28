@@ -29,7 +29,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -1257,6 +1257,6 @@ this.qlib = this.qlib||{};
 			', '+ mat[12] + ', ' + mat[13] + ', ' + mat[14] + ', ' + mat[15] + ']';
 	};
 	
-	qlib.Matrix3D = Matrix3D;
+	qlib["Matrix3D"] = Matrix3D;
 	
 })();

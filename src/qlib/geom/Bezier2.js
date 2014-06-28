@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 	"use strict";
@@ -175,44 +175,49 @@ this.qlib = this.qlib||{};
 			return new qlib.Bezier2( this.p1, this.c, this.p2 );
 	}
 	
-	p.moveToStart = function( g )
+	p.moveToStart = function( g, offset )
 	{
-		g.moveTo( this.p1.x, this.p1.y );
+		g.moveTo( this.p1.x+ ( offset != null ? offset.x : 0 ), this.p1.y+ ( offset != null ? offset.y : 0 ) );
 	}
 	
-	p.moveToEnd = function( g )
+	p.moveToEnd = function( g, offset )
 	{
-		g.moveTo( this.p2.x, this.p2.y );
+		g.moveTo( this.p2.x+ ( offset != null ? offset.x : 0 ), this.p2.y+ ( offset != null ? offset.y : 0 ) );
 	}
 	
-	p.draw = function(g ) 
+	p.draw = function(g, offset ) 
 	{
-		this.moveToStart( g );
-		this.drawTo( g );
+		this.moveToStart( g, offset );
+		this.drawTo( g, offset );
 	}
 	
-	p.drawExtras = function(g, factor ) 
+	p.drawExtras = function(g, factor, offset ) 
 	{
 		factor = ( factor == null ? 1 : factor);
-		this.moveToStart( g );
-		g.lineTo(this.c.x, this.c.y);
-		g.lineTo(this.p2.x, this.p2.y);
+		this.moveToStart( g, offset );
+		g.lineTo(this.c.x+ ( offset != null ? offset.x : 0 ), this.c.y+ ( offset != null ? offset.y : 0 ));
+		g.lineTo(this.p2.x+ ( offset != null ? offset.x : 0 ), this.p2.y+ ( offset != null ? offset.y : 0 ));
 		
-		this.p1.draw(g,factor);
-		this.p2.draw(g,factor);
-		this.c.draw(g,factor);
+		this.p1.draw(g,factor, offset);
+		this.p2.draw(g,factor, offset);
+		this.c.draw(g,factor, offset);
 		
 	}
 	
-	p.drawTo = function(g) 
+	p.drawTo = function(g, offset) 
 	{
-		g.curveTo( this.c.x, this.c.y, this.p2.x,this.p2.y );
+		if ( offset == null )
+			g.curveTo( this.c.x, this.c.y, this.p2.x,this.p2.y );
+		else
+			g.curveTo( this.c.x + offset.x, this.c.y + offset.y, this.p2.x + offset.x,this.p2.y + offset.y );
 	}
 	
-	p.drawToReverse = function(g) 
+	p.drawToReverse = function(g, offset) 
 	{
-		g.curveTo( this.c.x,this.c.y,this.p1.x,this.p1.y );
-		
+		if ( offset == null )
+			g.curveTo( this.c.x,this.c.y,this.p1.x,this.p1.y );
+		else
+			g.curveTo( this.c.x+ offset.x,this.c.y+ offset.y,this.p1.x+ offset.x,this.p1.y + offset.y);
 	}
 
 	/**
@@ -224,5 +229,5 @@ this.qlib = this.qlib||{};
 		return "Bezier2";
 	}
 	
-qlib.Bezier2 = Bezier2;
+	qlib["Bezier2"] = Bezier2;
 }());

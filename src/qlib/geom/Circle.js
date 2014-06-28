@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -121,7 +121,7 @@ this.qlib = this.qlib||{};
 			return;
 		} else 
 		{
-			s1>s2 ? s1 -= 360 : "";
+			if (s1>s2) s1 -= 360;
 			x1 = this.r * Math.cos(s1*rad)+this.c.x;
 			y1 = this.r * Math.sin(s1*rad)+this.c.y;
 			grad = s2-s1;
@@ -180,6 +180,49 @@ this.qlib = this.qlib||{};
 		return this.inversionPoint( ip );
 	}
 	
+	// based on java code by Paul Hertz
+	// http://ignotus.com/factory/wp-content/uploads/2010/03/bezcircle_applet/index.html
+	p.toMixedPath = function( cubicBezierCount )
+	{
+		/** 
+		 * kappa = distance between Bezier anchor and its associated control point divided by circle radius 
+		 * when circle is divided into 4 sectors 0f 90 degrees
+		 * see http://www.whizkidtech.redprince.net/bezier/circle/kappa/, notes by G. Adam Stanislav
+		 */
+		 if ( cubicBezierCount == null ) cubicBezierCount = 4;
+		var kappa = 0.5522847498;
+
+		var k = 4 * kappa / cubicBezierCount;
+		var d = k * this.r;
+		var secPi = Math.PI*2/cubicBezierCount;
+		
+		var a1 = new qlib.Vector2(0,this.r);
+		var c1 = new qlib.Vector2(d,this.r);
+		var a2 = new qlib.Vector2(0,this.r);
+		var c2 = new qlib.Vector2(-d,this.r);
+		
+		a2.rotateBy(-secPi);
+		c2.rotateBy(-secPi);
+		
+		var path = new qlib.MixedPath();
+		path.addPoint( a1.getPlus(this.c) );
+		path.addControlPoint( c1.getPlus(this.c) );
+		path.addControlPoint( c2.getPlus(this.c) );
+		path.addPoint( a2.getPlus(this.c) );
+		
+		for (var i = 1; i < cubicBezierCount; i++) 
+		{
+			a2.rotateBy(-secPi);
+			c2.rotateBy(-secPi);
+			c1.rotateBy(-secPi);
+			path.addControlPoint( c1.getPlus(this.c) );
+			path.addControlPoint( c2.getPlus(this.c) );
+			path.addPoint( a2.getPlus(this.c) );
+		}
+		path.deletePointAt(path.pointCount-1);
+		path.closed = true;
+		return path;
+	}
 	
 	//http://mathworld.wolfram.com/Inversion.html
 	/**
@@ -217,5 +260,5 @@ this.qlib = this.qlib||{};
 		return "[Circle (c="+this.c.toString()+" r="+this.r+")]";
 	}
 	
-qlib.Circle = Circle;
+	qlib["Circle"] = Circle;
 }());

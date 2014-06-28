@@ -31,7 +31,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 	
@@ -163,12 +163,12 @@ this.qlib = this.qlib||{};
 		
 		// Now that we have the quadratic coefficients, find the eigenvectors.
 		
-		const VANISHING_EPSILON = 1.0e-5;
-		const SAMENESS_LOW = 0.9999;
-		const SAMENESS_HIGH = 1.0001;
+		var VANISHING_EPSILON = 1.0e-5;
+		var SAMENESS_LOW = 0.9999;
+		var SAMENESS_HIGH = 1.0001;
 		
 		var punt = false;
-		const A_EPSILON = 0.0000001;
+		var A_EPSILON = 0.0000001;
 		
 		if (this.a < A_EPSILON) {
 			punt = true;
@@ -221,7 +221,7 @@ this.qlib = this.qlib||{};
 		dest.c = this.c - y*y;
 	}
 				
-	qlib.CovarianceMatrix2 = CovarianceMatrix2;
+	qlib["CovarianceMatrix2"] = CovarianceMatrix2;
 }());
 
 

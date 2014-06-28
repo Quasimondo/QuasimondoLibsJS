@@ -1,5 +1,5 @@
 /*
-* TriangleUtils
+* PolygonUtils
 *
 * Copyright (c) 2013 Mario Klingemann
 * 
@@ -30,30 +30,14 @@ window["qlib"] = window.qlib || {};
 
 (function() {
 
-	var TriangleUtils = function() {}
+	var PolygonUtils = function() {}
 	
-	TriangleUtils.getCenteredTriangle = function( center, leftLength, rightLength, bottomLength, angle  )
+	// static methods:
+	PolygonUtils.getSmoothPath = function( polygon, factor, mode)
 	{
-		angle = ( angle == null ? angle : 0 );
-		var alpha = - Math.acos( ( leftLength * leftLength - rightLength * rightLength + bottomLength * bottomLength ) / ( 2 * leftLength * bottomLength) );
-		if ( isNaN( alpha )) return null;
-		
-		var v1 = new qlib.Vector2(0,0);
-		var v2 = new qlib.Vector2(bottomLength,0 );
-		var v3 = new qlib.Vector2( Math.cos( alpha ) * leftLength, Math.sin( alpha ) * leftLength );
-		
-		var triangle = new qlib.Triangle( v1, v2, v3 );
-		var ctr = triangle.centerOfMass();
-		if ( angle != 0 ) triangle.rotate( angle );
-		triangle.translate( center.getMinus( ctr ) );
-		return triangle;
-	}
-		
-	TriangleUtils.getEquilateralTriangle = function( pa, pb, flipped )
-	{
-		flipped = ( flipped == 0 ? false : flipped );
-		return new qlib.Triangle( pa, pb, new qlib.Vector2( pa.getAddCartesian(pa.angleTo(pb) +  Math.PI / 3 * ( flipped ? -1 : 1), pa.distanceToVector( pb ))) );
+		if ( mode == null ) mode = 0;
+		return qlib.LinearPath.fromArray( polygon.toArray(), true ).getSmoothPath( factor, mode, true );
 	}
 	
-	qlib["TriangleUtils"] = TriangleUtils;
+	qlib["PolygonUtils"] = PolygonUtils;
 }());

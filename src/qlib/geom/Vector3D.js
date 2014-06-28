@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -299,5 +299,5 @@ var p = Vector3D.prototype;
 		return '[' + this.x + ', ' + this.y + ', ' + this.z + ', ' + this.w+ ']'; 
 	};
 	
-qlib.Vector3 = Vector3;
+	qlib["Vector3D"] = Vector3D;
 }());

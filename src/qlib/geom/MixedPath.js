@@ -48,7 +48,7 @@ this.qlib = this.qlib || {};
 		var mp = new qlib.MixedPath();
 		for ( var i = 0; i < lp.pointCount; i++ )
 		{
-			mp.addPoint(  clonePoints ? lp.points[i].getClone() :  lp.points[i] );	
+			mp.addPoint(  clonePoints ? lp.points[i].clone() :  lp.points[i] );	
 		}
 		mp.updateSegments();
 		return mp;
@@ -102,6 +102,17 @@ this.qlib = this.qlib || {};
 		mp.addControlPoint( new qlib.Vector2( center.x - dx - k, center.y - h2 ) );
 		if ( cornerRadius < w2 ) mp.addPoint( new qlib.Vector2( center.x - dx, center.y - h2 ) );
 		
+		mp.closed = true;
+		return mp;
+	}
+		
+	MixedPath.getRectangle = function( x,y,width,height )
+	{
+		var mp = new qlib.MixedPath();
+		mp.addPoint( new qlib.Vector2( x,y ) );
+		mp.addPoint( new qlib.Vector2( x+width,y ) );
+		mp.addPoint( new qlib.Vector2( x+width,y+height ) );
+		mp.addPoint( new qlib.Vector2( x,y+height ) );
 		mp.closed = true;
 		return mp;
 	}
@@ -267,8 +278,8 @@ this.qlib = this.qlib || {};
 		if ( !this.isValid || (!this._closed && (t<0 || t>1))) return null;
 		if ( !this._closed )
 		{
-			if ( t > 1 ) t == 1;
-			else if ( t < 0 ) t == 0;
+			if ( t > 1 ) t = 1;
+			else if ( t < 0 ) t = 0;
 		} else {
 			t = ((t%1)+1)%1;
 		}
@@ -299,8 +310,8 @@ this.qlib = this.qlib || {};
 		if ( !this.isValid || (!this._closed && (t<0 || t>1))) return null;
 		if ( !this._closed )
 		{
-			if ( t > 1 ) t == 1;
-			else if ( t < 0 ) t == 0;
+			if ( t > 1 ) t = 1;
+			else if ( t < 0 ) t = 0;
 		} else {
 			t = ((t%1)+1)%1;
 		}
@@ -494,7 +505,7 @@ this.qlib = this.qlib || {};
 		
 		var closest = this.segments[0].getClosestPoint( p );
 		var minDist = closest.squaredDistanceToVector( p );
-		var closestSegmentindex = 0;
+		var closestSegmentIndex = 0;
 		var dist;
 		var pt;
 		for ( var i = 1; i < this.segments.length; i++ )
@@ -622,7 +633,7 @@ this.qlib = this.qlib || {};
 	{
 		if ( this.dirty && !this.updateSegments() ) return null;
 		
-		if ( closed ) index = (( index % cornerCount ) + cornerCount ) % cornerCount;
+		if ( this._closed ) index = (( index % cornerCount ) + cornerCount ) % cornerCount;
 		else if ( index < 0 ) index = 0;
 		else if ( index >= cornerCount )
 		{
@@ -655,7 +666,7 @@ this.qlib = this.qlib || {};
 		var totalSteps = totalLength / segmentLength;
 		var t_step;
 		var t_base = 0;
-		mode = mode || LINEARIZE_APPROXIMATE;
+		mode = mode || MixedPath.LINEARIZE_APPROXIMATE;
 		
 		if ( mode != MixedPath.LINEARIZE_APPROXIMATE )
 		{
@@ -698,7 +709,7 @@ this.qlib = this.qlib || {};
 			s = this.segments[i];
 			if ( s.type == "LineSegment" )
 			{
-				poly.addPoint(s.p1.getClone());
+				poly.addPoint(s.p1.clone());
 			} else {
 				steps = s.length / segmentLength;
 				steps--;
@@ -729,8 +740,8 @@ this.qlib = this.qlib || {};
 				r = r.union( this.segments[i].getBoundingRect() );
 			}
 		} else {
-			var minP = this.segments[0].getPoint( 0 ).getClone();
-			var maxP = this.segments[0].getPoint( 0 ).getClone();
+			var minP = this.segments[0].getPoint( 0 ).clone();
+			var maxP = this.segments[0].getPoint( 0 ).clone();
 			var segmentLength = 1;
 			for ( i = 0; i < this.segments.length; i++ )
 			{
@@ -843,7 +854,7 @@ this.qlib = this.qlib || {};
 			else
 				path.points.push(this.points[i]);
 		}
-		path._closed = this._closed;
+		path.closed = this._closed;
 		path.updateSegments();
 		return path;
 	}
@@ -900,34 +911,34 @@ this.qlib = this.qlib || {};
 				
 				if ( t_sub == 0 )
 				{
-					leftPath.addPoint( clonePoints ? this.segments[i].p1.getClone() :this.segments[i].p1 );
-					rightPath.addPoint( clonePoints ? this.segments[i].p1.getClone() : this.segments[i].p1 );
+					leftPath.addPoint( clonePoints ? this.segments[i].p1.clone() :this.segments[i].p1 );
+					rightPath.addPoint( clonePoints ? this.segments[i].p1.clone() : this.segments[i].p1 );
 						
 					if ( this.segments[i].type == "Bezier2" )
 					{
-						rightPath.addControlPoint( clonePoints ? this.segments[i].c.getClone() :  Bezier2( this.segments[i] ).c );
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c.clone() :  Bezier2( this.segments[i] ).c );
 						
 					} else if ( this.segments[i].type == "Bezier3" )
 					{
-						rightPath.addControlPoint( clonePoints ? this.segments[i].c1.getClone() : this.segments[i].c1 );
-						rightPath.addControlPoint( clonePoints ? this.segments[i].c2.getClone() : this.segments[i].c2 );
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c1.clone() : this.segments[i].c1 );
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c2.clone() : this.segments[i].c2 );
 					}
-					rightPath.addPoint( clonePoints ? this.segments[i].p2.getClone() : this.segments[i].p2 );
+					rightPath.addPoint( clonePoints ? this.segments[i].p2.clone() : this.segments[i].p2 );
 				} else if ( t_sub == 1 )
 				{
-					leftPath.addPoint( clonePoints ? this.segments[i].p1.getClone() : this.segments[i].p1 );
+					leftPath.addPoint( clonePoints ? this.segments[i].p1.clone() : this.segments[i].p1 );
 						
 					if ( this.segments[i].type == "Bezier2" )
 					{
-						leftPath.addControlPoint( clonePoints ? this.segments[i].c.getClone() : this.segments[i].c );
+						leftPath.addControlPoint( clonePoints ? this.segments[i].c.clone() : this.segments[i].c );
 					} else if ( this.segments[i].type == "Bezier3" )
 					{
-						leftPath.addControlPoint( clonePoints ? this.segments[i].c1.getClone() : this.segments[i].c1 );
-						leftPath.addControlPoint( clonePoints ? this.segments[i].c2.getClone() : this.segments[i].c2 );
+						leftPath.addControlPoint( clonePoints ? this.segments[i].c1.clone() : this.segments[i].c1 );
+						leftPath.addControlPoint( clonePoints ? this.segments[i].c2.clone() : this.segments[i].c2 );
 						
 					}
-					leftPath.addPoint( clonePoints ? this.segments[i].p2.getClone() :  this.segments[i].p2 );
-					rightPath.addPoint( clonePoints ? this.segments[i].p2.getClone() : this.segments[i].p2 );
+					leftPath.addPoint( clonePoints ? this.segments[i].p2.clone() :  this.segments[i].p2 );
+					rightPath.addPoint( clonePoints ? this.segments[i].p2.clone() : this.segments[i].p2 );
 				} else {
 					if ( this.segments[i].type == "LineSegment" )
 					{
@@ -958,7 +969,7 @@ this.qlib = this.qlib || {};
 						rightPath.addPoint( bez3Parts[1].p1 );
 						rightPath.addControlPoint( bez3Parts[1].c1 );
 						rightPath.addControlPoint( bez3Parts[1].c2 );
-						rightPath.addControlPoint( bez3Parts[1].p2 );
+						rightPath.addPoint( bez3Parts[1].p2 );
 					}
 				}
 					
@@ -966,13 +977,13 @@ this.qlib = this.qlib || {};
 				{
 					if ( this.segments[i].type == "Bezier2" )
 					{
-						rightPath.addControlPoint( clonePoints ? this.segments[i].c.getClone() : this.segments[i].c );
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c.clone() : this.segments[i].c );
 					} else if ( this.segments[i].type == "Bezier3" )
 					{
-						rightPath.addControlPoint( clonePoints ? this.segments[i].c1.getClone() : this.segments[i].c1 );
-						rightPath.addControlPoint( clonePoints ? this.segments[i].c2.getClone() : this.segments[i].c2 );
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c1.clone() : this.segments[i].c1 );
+						rightPath.addControlPoint( clonePoints ? this.segments[i].c2.clone() : this.segments[i].c2 );
 					}
-					rightPath.addPoint( clonePoints ? this.segments[i].p2.getClone() : this.segments[i].p2 );
+					rightPath.addPoint( clonePoints ? this.segments[i].p2.clone() : this.segments[i].p2 );
 				}
 				
 				leftPath.closed = false;
@@ -981,14 +992,14 @@ this.qlib = this.qlib || {};
 				return result;
 				
 			} else {
-				leftPath.addPoint( clonePoints ? this.segments[i].p1.getClone() : this.segments[i].p1 );
+				leftPath.addPoint( clonePoints ? this.segments[i].p1.clone() : this.segments[i].p1 );
 				if ( this.segments[i].type == "Bezier2" )
 				{
-					leftPath.addControlPoint( clonePoints ? this.segments[i].c.getClone() : this.segments[i].c );
+					leftPath.addControlPoint( clonePoints ? this.segments[i].c.clone() : this.segments[i].c );
 				} else if ( this.segments[i].type == "Bezier3" )
 				{
-					leftPath.addControlPoint( clonePoints ? this.segments[i].c1.getClone() : this.segments[i].c1 );
-					leftPath.addControlPoint( clonePoints ? this.segments[i].c2.getClone() : this.segments[i].c2 );
+					leftPath.addControlPoint( clonePoints ? this.segments[i].c1.clone() : this.segments[i].c1 );
+					leftPath.addControlPoint( clonePoints ? this.segments[i].c2.clone() : this.segments[i].c2 );
 				}
 			}
 			last_t = this.t_toSegments[i];
@@ -997,22 +1008,22 @@ this.qlib = this.qlib || {};
 		return result;
 	}
 	
-	p.draw = function( g )
+	p.draw = function( g, offset )
 	{
 		if ( this.dirty ) this.updateSegments();
 		
 		if (this.isValid)
 		{
-			this.segments[0].moveToStart( g );
+			this.segments[0].moveToStart( g, offset );
 			for (var i = 0; i < this.segments.length; i++ )
 			{
-				this.segments[i].drawTo( g );
+				this.segments[i].drawTo( g, offset );
 			}
 			
 		}
 	}
 	
-	p.drawExtras = function( g, factor   )
+	p.drawExtras = function( g, factor, offset   )
 	{
 		if ( this.dirty ) this.updateSegments();
 		
@@ -1022,7 +1033,7 @@ this.qlib = this.qlib || {};
 			{
 				if ( this.segments[i].type != "LineSegment" )
 				{
-					this.segments[i].drawExtras( g, factor || 1);
+					this.segments[i].drawExtras( g, factor || 1, offset);
 				}
 			}
 			
@@ -1032,14 +1043,14 @@ this.qlib = this.qlib || {};
 		{
 			if ( this.points[i].isControlPoint )
 			{
-				this.points[i].drawCircle(g,3);
+				this.points[i].drawCircle(g,3, offset);
 			} else {
-				this.points[i].drawRect(g,3);
+				this.points[i].drawRect(g,3, offset);
 			}
 		}
 	}
 	
-	p.export = function( g )
+	p.exportDraw = function( g )
 	{
 		if ( this.dirty ) this.updateSegments();
 		
@@ -1074,12 +1085,62 @@ this.qlib = this.qlib || {};
 		}
 		
 		if ( parts.length == 2  ) result.push( parts[1] );
-		if ( closed && result.length > 1 )
+		if ( this._closed && result.length > 1 )
 		{
 			var p1 = result.shift();
 			result[ result.length - 1 ].appendPath( p1 );
 		}
 		return result;
+	}
+	
+	
+	
+	p.toLinearPath = function( segmentLength, mode  )
+	{
+		if ( mode == null ) mode = MixedPath.LINEARIZE_APPROXIMATE;
+		if ( this.dirty ) this.updateSegments();
+		
+		var lp = new qlib.LinearPath();
+		var s;
+		
+		var ti;
+		var t;
+		var steps;
+		var j;
+		
+		var totalLength = this.length;
+		if ( totalLength == 0 ) return lp;
+		
+		var totalSteps = totalLength / segmentLength;
+		var t_step;
+		var t_base = 0;
+		if ( mode != MixedPath.LINEARIZE_APPROXIMATE )
+		{
+			var coveredLength = totalSteps * segmentLength;
+			t_step = (coveredLength / totalLength) / totalSteps;
+			if ( mode == MixedPath.LINEARIZE_CENTER ) t_base = 0.5 * (1 - ( coveredLength / totalLength ));
+		} else {
+			t_step = totalSteps > 0 ? 1 / totalSteps : totalLength;
+			
+		}
+		
+		if ( mode == MixedPath.LINEARIZE_CENTER && t_base != 0 ) lp.addPoint( this.getPoint(0) );
+		for ( var i = 0; i <= totalSteps; i++ )
+		{
+			lp.addPoint( this.getPoint( t_base + i * t_step ) );
+		}
+		if ( mode ==  MixedPath.LINEARIZE_OVERSHOOT ) {
+			var p1 = lp.points[lp.points.length-1];
+			var p2 = this.getPoint( 1 );
+			lp.addPoint( p2.minus( p1 ).newLength( segmentLength ).plus(p1) );
+		} else if ( (mode == MixedPath.LINEARIZE_CENTER && t_base != 0) || ( mode == MixedPath.LINEARIZE_COMPLETE && (i-1) * t_step != 1) ) lp.addPoint( this.getPoint(1) );
+		
+		if ( this._closed )
+		{
+			lp.addPoint( this.segments[0].getPoint( 0 ) );
+		}
+		
+		return lp;
 	}
 	
 	p.getArea = function( precision )
@@ -1102,5 +1163,5 @@ this.qlib = this.qlib || {};
 		return (this._closed ? "closed":"open") + ";" + result.join(",");
 	}
 	
-	qlib.MixedPath = MixedPath;
+	qlib["MixedPath"] = MixedPath;
 }());

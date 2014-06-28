@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -278,5 +278,5 @@ this.qlib = this.qlib||{};
 		return "Triangle";
 	}
 	
-qlib.Triangle = Triangle;
+	qlib["Triangle"] = Triangle;
 }());

@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 	
@@ -224,7 +224,7 @@ this.qlib = this.qlib||{};
 		axis0.multiply(len0);
 		axis1.multiply(len1);
 		
-		const NUM_VERTICES = 300;
+		var NUM_VERTICES = 300;
 		
 		// Generate the vertex coordinates for the ellipse.
 		
@@ -325,5 +325,5 @@ this.qlib = this.qlib||{};
 		}
 	}
 		
-	qlib.Vector2Cloud = Vector2Cloud;
+	qlib["Vector2Cloud"] = Vector2Cloud;
 }());

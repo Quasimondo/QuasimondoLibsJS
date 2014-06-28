@@ -1,5 +1,5 @@
 /*
-* Matrix3D
+* ArcBall
 *
 * Original BitmapData.js code by Peter Nitsch - https://github.com/pnitsch/BitmapData.js
 * HTML5 Canvas API implementation of the AS3 BitmapData class. 
@@ -29,7 +29,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -102,7 +102,7 @@ this.qlib = this.qlib||{};
 		this.dragTo(this.dragVector);
 	}
 	
-	p.multiplyQuats(q1, q2, out)
+	p.multiplyQuats = function(q1, q2, out)
 	{
 		out.x = q1.w*q2.x+q1.x*q2.w+q1.y*q2.z-q1.z*q2.y;
 		out.y = q1.w*q2.y+q1.y*q2.w+q1.z*q2.x-q1.x*q2.z;
@@ -110,6 +110,6 @@ this.qlib = this.qlib||{};
 		out.w = q1.w*q2.w-q1.x*q2.x-q1.y*q2.y-q1.z*q2.z;
 	}
 		
-	qlib.ArcBall = ArcBall;
+	qlib["ArcBall"] = ArcBall;
 	
 })();

@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -61,8 +61,6 @@ this.qlib = this.qlib||{};
 			
 			new qlib.Vector2( 	circle0.c.x + Math.cos( angle ) * baseRadius + Math.cos( angle - halfPi ) * radius, 
 				circle0.c.y + Math.sin( angle ) * baseRadius + Math.sin( angle - halfPi ) * radius	) ] ;
-		
-		return null;
 	}
 		
 		
@@ -235,5 +233,5 @@ this.qlib = this.qlib||{};
 		return ip;
 	}
 	
-qlib.IntersectionUtils = IntersectionUtils;
+	qlib["IntersectionUtils"] = IntersectionUtils;
 }());

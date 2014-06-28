@@ -10,7 +10,7 @@
  */
 
  // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
  
 (function(){
   
@@ -482,7 +482,7 @@ this.qlib = this.qlib||{};
     }
   };
 
-  qlib.KDTree = kdTree;
+  qlib["KDTree"] = kdTree;
 
   
 })();

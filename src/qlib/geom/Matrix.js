@@ -28,7 +28,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -211,6 +211,7 @@ var p = Matrix.prototype;
 	 * Prepends the specified matrix with this matrix.
 	 * @method prependMatrix
 	 * @param {Matrix} matrix
+	 * @return {Matrix} This matrix. Useful for chaining method calls.
 	 **/
 	p.prependMatrix = function(matrix) {
 		this.prepend(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
@@ -229,6 +230,30 @@ var p = Matrix.prototype;
 		this.appendProperties(matrix.alpha, matrix.shadow,  matrix.compositeOperation);
 		return this;
 	}
+	
+	
+	/**
+	 * Prepends the specified matrix with this matrix.
+	 * @method prependArray
+	 * @param {Matrix} matrix
+	 * @return {Matrix} This matrix. Useful for chaining method calls.
+	 **/
+	p.prependArray= function(array) {
+		this.prepend(array[0],array[1],array[2],array[3],array[4],array[5]);
+		return this;
+	}
+	
+	/**
+	 * Appends an 6 element array.
+	 * @method appendArray
+	 * @param {Array} array
+	 * @return {Matrix} This matrix. Useful for chaining method calls.
+	 **/
+	p.appendArray = function(array) {
+		this.append(array[0],array[1],array[2],array[3],array[4],array[5]);
+		return this;
+	}
+
 
 	/**
 	 * Generates matrix properties from the specified display object transform properties, and prepends them with this matrix.
@@ -440,17 +465,31 @@ var p = Matrix.prototype;
 		if (target == null) { target = {}; }
 		target.x = this.tx;
 		target.y = this.ty;
-		target.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
-		target.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
+		target.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);// * ( this.a < 0 ? -1 : 1);
+		target.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);// * ( this.d < 0 ? -1 : 1);
 
+		
+		
+		 var sign = Math.atan(-this.c / this.a);
+		var rad  = Math.acos(this.a / target.scaleX);
+		var deg  = rad / Matrix.DEG_TO_RAD;
+		if ((deg > 90 && sign > 0) || (deg < 90 && sign < 0))
+		{
+				target.rotation = (360 - deg);
+		} else
+		{
+				target.rotation = deg;
+		}
+	
 		var skewX = Math.atan2(-this.c, this.d);
 		var skewY = Math.atan2(this.b, this.a);
-
 		if (skewX == skewY) {
+			/*
 			target.rotation = skewY/Matrix.DEG_TO_RAD;
 			if (this.a < 0 && this.d >= 0) {
 				target.rotation += (target.rotation <= 0) ? 180 : -180;
 			}
+			*/
 			target.skewX = target.skewY = 0;
 		} else {
 			target.skewX = skewX/Matrix.DEG_TO_RAD;
@@ -536,5 +575,5 @@ var p = Matrix.prototype;
 	// this has to be populated after the class is defined:
 	Matrix.identity = new Matrix(1, 0, 0, 1, 0, 0);
 
-qlib.Matrix = Matrix;
+	qlib["Matrix"] = Matrix;
 }());

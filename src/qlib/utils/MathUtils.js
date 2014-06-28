@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -79,7 +79,5 @@ this.qlib = this.qlib||{};
 		
 	}
 	
-	
-	
-qlib.MathUtils = MathUtils;
+	qlib["MathUtils"] = MathUtils;
 }());

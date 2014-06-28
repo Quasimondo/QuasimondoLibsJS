@@ -1,4 +1,4 @@
-/*
+/**
 * MixedPath Point
 *
 * Copyright (c) 2013 Mario Klingemann
@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -61,5 +61,5 @@ var p = MixedPathPoint.prototype = new qlib.Vector2();
 		return this.x + "|" + this.y + ( this.isControlPoint ? "|c":"" );
 	}
 	
-qlib.MixedPathPoint = MixedPathPoint;
+	qlib["MixedPathPoint"] = MixedPathPoint;
 }());

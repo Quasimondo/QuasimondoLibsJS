@@ -26,7 +26,7 @@
 */
 
 // namespace:
-this.qlib = this.qlib||{};
+window["qlib"] = window.qlib || {};
 
 (function() {
 
@@ -382,5 +382,5 @@ this.qlib = this.qlib||{};
 		
 		
 	
-qlib.CircleUtils = CircleUtils;
+	qlib["CircleUtils"] = CircleUtils;
 }());
