@@ -86,10 +86,11 @@
 	<div style="padding:8px; width:500px;">
 	<p>You might have run into this issue: you want to manipulate the pixels of images in canvas, but once you try this with images that come from domains other than the one the page is hosted the security sandbox prevents you to do that. One solution to this problem is to load all images through a proxy on your server first. This has the downside that you have to pay for the extra traffic caused by this.<p>
 	<p>Thanks to a bug in the Adobe Flash player this can currently be avoided by creating a proxy on the client side. <a href="https://github.com/Quasimondo/QuasimondoLibsJS/tree/master/demos">Crossdominator</a> is a tiny Flash file and a bit of Javascript that allow you to load images from any domain and not get bothered by the security sandbox.</p>
-	<p>This demo is really more like a proof-of-concept, since I expect Adobe to plug that hole any time soon. And obviously since Flash is required this trick will not work on your mobile.</p>
-	<p>The credits for the discovery of this loophole go to <a href="https://twitter.com/makc3d">@makc</a></p>
+	<p>This demo is really more like a proof-of-concept, since I expect Adobe to plug that hole any time soon (even though it seems like the exploit has been around for many years now). And obviously since Flash is required this trick will not work on your mobile.</p>
+	<p>The credits for pointing out this loophole which was discovered by some russian hackers a few years ago go to <a href="https://twitter.com/makc3d">@makc</a></p>
+	<p>In IE exists a similar security hole using IFrames, discovered by <a href="http://www.goodboydigital.com/ie-cross-domain-getpixeldata-hack/">Mat Groves</a>.</p>
 	<p>Ping me on twitter if you have questions or ideas for improvements: <a href="https://twitter.com/Quasimondo">@Quasimondo</a>
-	<p>In this demo you can load an image from any url. To show that pixel access is possible the left half will be inverted.</p>
+	<p>In this demo you can load an image from any url. To show that pixel access is possible the left half will be inverted. Check the source code to see how it works.</p>
 	<p>
 	<div>Enter an image URL: <input type="text" id="imageURL" value="http://37.media.tumblr.com/76ee3fc172208a782b0ddd0dd56b1500/tumblr_my1rw0Xwci1r6mzh8o1_500.jpg" style="width:400px;"/>
 	<button id="loadButton">Load Image with Crossdominator</button>
