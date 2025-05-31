@@ -1,0 +1,20 @@
+{
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "include": ["src/qlib", "README.md"],
+    "includePattern": ".+\\.js(doc)?$",
+    "exclude": ["src/qlib/geom/Delaunay.js"],
+    "excludePattern": "(^|\\/|\\\\)node_modules(\\/|\\\\|$)"
+  },
+  "plugins": [],
+  "opts": {
+    "encoding": "utf8",
+    "destination": "./docs/",
+    "recurse": true,
+    "verbose": true,
+    "package": "package.json"
+  },
+  "sourceType": "module"
+}

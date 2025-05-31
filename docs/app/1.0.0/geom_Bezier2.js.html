@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: geom/Bezier2.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: geom/Bezier2.js</h1>
+
+
+
+
+
+
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+* Quadratic Bezier Curve
+*
+* Copyright (c) 2013 Mario Klingemann
+*
+* Permission is hereby granted, free of charge, to any person
+* obtaining a copy of this software and associated documentation
+* files (the "Software"), to deal in the Software without
+* restriction, including without limitation the rights to use,
+* copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following
+* conditions:
+*
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// namespace:
+window["qlib"] = window.qlib || {};
+
+(function() {
+	"use strict";
+
+	var Bezier2 = function() {
+	  this.initialize( arguments );
+	}
+
+	var p = Bezier2.prototype = new qlib.GeometricShape();
+
+
+	Bezier2.CURVE_LENGTH_PRECISION = 31;
+	Bezier2.OFFSET_PRECISION = 10;
+
+	// public properties:
+	p.type = "Bezier2";
+
+
+	// constructor:
+	/**
+	 * Initialization method.
+	 * @method initialize
+	 * @protected
+	*/
+	p.initialize = function( args ) {
+		var i = 0;
+		if ( args.length == 0 )
+		{
+			this.p1 = new qlib.Vector2();
+			this.p2 = new qlib.Vector2();
+			this.c = new qlib.Vector2();
+		} else {
+			if ( typeof args[0] == "number" )
+			{
+				this.p1 = new qlib.Vector2( args[0], args[1] );
+				i += 2;
+			} else {
+				this.p1 = args[0];
+				i++;
+			}
+			if ( typeof args[i] == "number" )
+			{
+				this.c = new qlib.Vector2( args[i], args[i+1] );
+				i += 2;
+			} else {
+				this.c = args[i];
+				i++;
+			}
+			if ( typeof args[i] == "number" )
+			{
+				this.p2 = new qlib.Vector2( args[i], args[i+1] );
+			} else {
+				this.p2 = args[i];
+			}
+		}
+		this.dirty = true;
+	}
+
+// public methods:
+
+
+	p.getPoint = function( t )
+	{
+		var ti = 1-t;
+		return new qlib.Vector2( ti*ti*this.p1.x+2*t*ti*this.c.x+t*t*this.p2.x , ti*ti*this.p1.y+2*t*ti*this.c.y+t*t*this.p2.y);
+	}
+
+	p.__defineGetter__("length", function(){
+		if ( !this.dirty ) return this.__length;
+
+		var min_t = 0;
+		var max_t = 1;
+		var	i;
+		var	len = 0;
+		var n_eval_pts = Bezier2.CURVE_LENGTH_PRECISION;
+		if ( !( n_eval_pts &amp; 1 ) ) n_eval_pts++;
+
+		var t = [];
+		var pt = [];
+
+		for ( i = 0 ; i &lt; n_eval_pts ; ++i )
+		{
+			t[i]  =  i / ( n_eval_pts - 1 );
+			pt[i] = this.getPoint(t[i]);
+		}
+
+		for ( i = 0 ; i &lt; n_eval_pts - 1 ; i += 2 )
+		{
+			len += this.getSectionLength (t[i] , t[i+1] , t[i+2] , pt[i] , pt[i+1] , pt[i+2]);
+		}
+
+		this.__length = len;
+		this.dirty = false;
+
+		return len;
+	});
+
+	p.getSectionLength = function (t0, t1, t2, pt0, pt1, pt2 )
+	{
+
+		var kEpsilon	= 1e-5;
+		var kEpsilon2	= 1e-6;
+		var kMaxArc	= 1.05;
+		var kLenRatio	= 1.2;
+
+		var d2,len_1,len_2;
+
+		var d1 = pt0.getMinus( pt2 ).length;
+		var da = pt0.getMinus( pt1 ).length;
+		var db = pt1.getMinus( pt2 ).length;
+
+		d2 = da + db;
+
+		if ( d2 &lt; kEpsilon || da==0 || db == 0){
+			return ( d2 + ( d2 - d1 ) / 3 );
+		} else if ( ( d1 &lt; kEpsilon || d2/d1 > kMaxArc ) || ( da &lt; kEpsilon2 || db/da > kLenRatio ) || ( db &lt; kEpsilon2 || da/db > kLenRatio ) ) {
+			var	mid_t = ( t0 + t1 ) / 2;
+
+			var	pt_mid = this.getPoint ( mid_t );
+
+			len_1 = this.getSectionLength( t0, mid_t, t1, pt0, pt_mid, pt1 );
+
+			mid_t = ( t1 + t2 ) / 2;
+
+			pt_mid = this.getPoint ( mid_t );
+
+			len_2 = this.getSectionLength (t1, mid_t, t2, pt1, pt_mid, pt2 );
+
+			return ( len_1 + len_2 );
+
+		} else {
+			return ( d2 + ( d2 - d1 ) / 3 );
+		}
+
+	}
+
+	/**
+	 * Returns a clone of the LineSegment instance.
+	 * @method clone
+	 * @return {LineSegment} a clone of the LineSegment instance.
+	 **/
+	p.clone = function( deepClone ) {
+		if ( deepClone == true )
+			return new qlib.Bezier2( this.p1.clone(), this.c.clone(), this.p2.clone());
+		else
+			return new qlib.Bezier2( this.p1, this.c, this.p2 );
+	}
+
+	p.moveToStart = function( g, offset )
+	{
+		g.moveTo( this.p1.x+ ( offset != null ? offset.x : 0 ), this.p1.y+ ( offset != null ? offset.y : 0 ) );
+	}
+
+	p.moveToEnd = function( g, offset )
+	{
+		g.moveTo( this.p2.x+ ( offset != null ? offset.x : 0 ), this.p2.y+ ( offset != null ? offset.y : 0 ) );
+	}
+
+	p.draw = function(g, offset )
+	{
+		this.moveToStart( g, offset );
+		this.drawTo( g, offset );
+	}
+
+	p.drawExtras = function(g, factor, offset )
+	{
+		factor = ( factor == null ? 1 : factor);
+		this.moveToStart( g, offset );
+		g.lineTo(this.c.x+ ( offset != null ? offset.x : 0 ), this.c.y+ ( offset != null ? offset.y : 0 ));
+		g.lineTo(this.p2.x+ ( offset != null ? offset.x : 0 ), this.p2.y+ ( offset != null ? offset.y : 0 ));
+
+		this.p1.draw(g,factor, offset);
+		this.p2.draw(g,factor, offset);
+		this.c.draw(g,factor, offset);
+
+	}
+
+	p.drawTo = function(g, offset)
+	{
+		if ( offset == null )
+			g.curveTo( this.c.x, this.c.y, this.p2.x,this.p2.y );
+		else
+			g.curveTo( this.c.x + offset.x, this.c.y + offset.y, this.p2.x + offset.x,this.p2.y + offset.y );
+	}
+
+	p.drawToReverse = function(g, offset)
+	{
+		if ( offset == null )
+			g.curveTo( this.c.x,this.c.y,this.p1.x,this.p1.y );
+		else
+			g.curveTo( this.c.x+ offset.x,this.c.y+ offset.y,this.p1.x+ offset.x,this.p1.y + offset.y);
+	}
+
+	/**
+	 * Returns a string representation of this object.
+	 * @method toString
+	 * @return {String} a string representation of the instance.
+	 **/
+	p.toString = function() {
+		return "Bezier2";
+	}
+
+	qlib["Bezier2"] = Bezier2;
+}());</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LineSegment.html">LineSegment</a></li><li><a href="Point.html">Point</a></li><li><a href="Vector2.html">Vector2</a></li></ul><h3>Global</h3><ul><li><a href="global.html#append">append</a></li><li><a href="global.html#appendArray">appendArray</a></li><li><a href="global.html#appendMatrix">appendMatrix</a></li><li><a href="global.html#appendProperties">appendProperties</a></li><li><a href="global.html#appendTransform">appendTransform</a></li><li><a href="global.html#clone">clone</a></li><li><a href="global.html#decompose">decompose</a></li><li><a href="global.html#identity">identity</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#invert">invert</a></li><li><a href="global.html#isIdentity">isIdentity</a></li><li><a href="global.html#prepend">prepend</a></li><li><a href="global.html#prependArray">prependArray</a></li><li><a href="global.html#prependMatrix">prependMatrix</a></li><li><a href="global.html#prependProperties">prependProperties</a></li><li><a href="global.html#prependTransform">prependTransform</a></li><li><a href="global.html#rotate">rotate</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#skew">skew</a></li><li><a href="global.html#toString">toString</a></li><li><a href="global.html#translate">translate</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 31 2025 06:36:44 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ui/Handle.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ui/Handle.js</h1>
+
+
+
+
+
+
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+* Circle
+*
+* Copyright (c) 2013 Mario Klingemann
+*
+* Permission is hereby granted, free of charge, to any person
+* obtaining a copy of this software and associated documentation
+* files (the "Software"), to deal in the Software without
+* restriction, including without limitation the rights to use,
+* copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following
+* conditions:
+*
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// namespace:
+window["qlib"] = window.qlib || {};
+
+(function() {
+
+
+	var Handle = function() {
+	  this.initialize(arguments);
+	}
+
+	Handle.colorScheme = ["#000","#888","#fff","#fff","#ff8000","#ffe000","#ffff00","#ffff00"];
+
+	if ( window.createjs != null )
+		var p = Handle.prototype = new createjs.Container();
+	else
+		var p = Handle.prototype;
+
+
+	/**
+	 * @property DisplayObject_initialize
+	 * @type Function
+	 * @private
+	 **/
+	p.Container_initialize = p.initialize;
+
+	p.initialize = function( args )
+	{
+		this.Container_initialize();
+		if ( args.length == 0 )
+		{
+			//arguments: none
+			this.point = new qlib.Vector2();
+		} else if ( typeof args[0] == "number" )
+		{
+			//arguments: center x, center y
+			this.point = new qlib.Vector2( args[0], args[1] );
+		} else {
+			//arguments: center
+			this.point = args[0];
+		}
+		this.grabber = (window.createjs != null ? new createjs.Shape() : {});
+		this.addChild( this.grabber );
+
+		this.HANDLE_SIZE = 7;
+
+		this.active = false;
+		this.mouseIsDown = false;
+		this.mouseIsOver = false;
+		this.selected = false;
+
+		this.x = this.point.x;
+		this.y = this.point.y;
+		this.cursor = "pointer";
+		this.updateGrabber();
+	}
+
+	p.setActive = function( value )
+	{
+		this.active = value;
+		if ( value )
+		{
+
+			this.addEventListener("mousedown", function(evt) {
+
+				// bump the target in front of it's siblings:
+				var o = evt.target;
+				o.mouseIsDown = true;
+				o.updateGrabber();
+				var offset = {x:o.x-evt.stageX, y:o.y-evt.stageY};
+
+				// add a listener to the event object's mouseMove event
+				// this will be active until the user releases the mouse button:
+				evt.addEventListener("mousemove", function(ev) {
+					o.lastOffset = { x: (ev.stageX+offset.x) -  o.point.x, y: ( ev.stageY+offset.y) - o.point.y};
+					o.point.x = o.x = ev.stageX+offset.x;
+					o.point.y = o.y = ev.stageY+offset.y;
+
+					o.dispatchEvent(  new qlib.Event( "change", o ) );
+					// indicate that the stage should be updated on the next tick:
+
+				});
+
+				evt.addEventListener("mouseup", function(ev) {
+					o.mouseIsDown = false;
+					o.updateGrabber();
+					// indicate that the stage should be updated on the next tick:
+
+				});
+
+			});
+
+			this.addEventListener("mouseover", function(evt) {
+				var o = evt.target;
+				o.mouseIsOver = true;
+				o.updateGrabber();
+			});
+
+			this.addEventListener("mouseout", function(evt) {
+				var o = evt.target;
+				o.mouseIsOver = false;
+				o.updateGrabber();
+			});
+
+
+		} else {
+			this.removeEventListener("mousedown");
+		}
+	}
+
+
+
+	p.updateGrabber = function()
+	{
+		var g = this.grabber.graphics;
+		g.clear();
+		g.setStrokeStyle(1, 'round', 'round');
+	    g.beginStroke("#fff");
+
+
+		g.beginFill(  Handle.colorScheme[(this.selected ? 4 : 0) | (this.mouseIsDown ? 2 : 0) | (this.mouseIsOver ? 1 : 0)] );
+		g.drawRect( - this.HANDLE_SIZE *0.5, - this.HANDLE_SIZE*0.5, this.HANDLE_SIZE, this.HANDLE_SIZE );
+		g.endFill();
+	}
+
+	p.setPosition = function( x, y )
+	{
+		this.point.x =  x;
+		this.point.y =  y;
+		this.x = Math.round( x );
+		this.y = Math.round( y );
+	}
+
+	p.updatePoint = function( p )
+	{
+		this.point.x =  p.x;
+		this.point.y =  p.y;
+		this.x = Math.round( p.x );
+		this.y = Math.round( p.y );
+	}
+
+	p.updatePositionFromPoint = function( )
+	{
+		this.x = Math.round( this.point.x );
+		this.y = Math.round( this.point.y );
+	}
+
+	p.setPoint = function( p )
+	{
+		this.point = p;
+		this.x = Math.round(  p.x );
+		this.y = Math.round(  p.y );
+	}
+
+	/**
+	 * Returns a string representation of this object.
+	 * @method toString
+	 * @return {String} a string representation of the instance.
+	 **/
+	p.toString = function() {
+		return "Handle";
+	}
+
+	qlib["Handle"] = Handle;
+}());</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LineSegment.html">LineSegment</a></li><li><a href="Point.html">Point</a></li><li><a href="Vector2.html">Vector2</a></li></ul><h3>Global</h3><ul><li><a href="global.html#append">append</a></li><li><a href="global.html#appendArray">appendArray</a></li><li><a href="global.html#appendMatrix">appendMatrix</a></li><li><a href="global.html#appendProperties">appendProperties</a></li><li><a href="global.html#appendTransform">appendTransform</a></li><li><a href="global.html#clone">clone</a></li><li><a href="global.html#decompose">decompose</a></li><li><a href="global.html#identity">identity</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#invert">invert</a></li><li><a href="global.html#isIdentity">isIdentity</a></li><li><a href="global.html#prepend">prepend</a></li><li><a href="global.html#prependArray">prependArray</a></li><li><a href="global.html#prependMatrix">prependMatrix</a></li><li><a href="global.html#prependProperties">prependProperties</a></li><li><a href="global.html#prependTransform">prependTransform</a></li><li><a href="global.html#rotate">rotate</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#skew">skew</a></li><li><a href="global.html#toString">toString</a></li><li><a href="global.html#translate">translate</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 31 2025 06:36:44 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
