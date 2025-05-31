@@ -31,260 +31,316 @@ window["qlib"] = window.qlib || {};
 
 (function() {
 
+/**
+ * Represents a convex polygon in 2D space, defined by an array of vertices.
+ * The class provides methods to compute the convex hull of a set of points,
+ * perform geometric transformations (rotate, scale, translate), calculate the centroid,
+ * update its bounding rectangle, and draw the polygon.
+ * It inherits from `qlib.GeometricShape`.
+ * Note: The actual convex hull calculation (`updateConvexHull`) implements an algorithm
+ * (likely Monotone Chain or a variation) to ensure the `points` array represents a convex polygon.
+ *
+ * @class ConvexPolygon
+ * @extends qlib.GeometricShape
+ * @constructor
+ * Initializes an empty convex polygon. Points should be added via `fromArray` or by manipulating the `points` array
+ * followed by a call to `updateConvexHull()` or by ensuring `dirty` is true before methods like `getCentroid()` are called.
+ */
 var ConvexPolygon = function() {
+  /**
+   * An array of `qlib.Vector2` objects representing the vertices of the polygon.
+   * These points are expected to be ordered along the convex hull after `updateConvexHull()` is called.
+   * @property {qlib.Vector2[]} points
+   */
   this.points = [];
-  this.dirty = false;
+  /**
+   * A flag indicating whether the polygon's internal state (e.g., convex hull, centroid, bounding box)
+   * needs to be recalculated. Set to `true` if points are modified externally.
+   * @property {boolean} dirty
+   * @protected
+   * @default false
+   */
+  this.dirty = false; // Should be true initially if points can be added before updateConvexHull
+  /**
+   * The calculated centroid (geometric center) of the polygon.
+   * Updated by `getCentroid()` when `dirty` is true.
+   * @property {qlib.Vector2} centroid
+   */
   this.centroid = new qlib.Vector2();
+  /**
+   * Cached bounding rectangle of the polygon.
+   * Updated by `updateBoundingRect()`.
+   * @property {qlib.Rectangle} _boundingRect
+   * @private
+   */
+  this._boundingRect = null;
 }
 
+/**
+ * Creates a new `ConvexPolygon` instance from an array of points.
+ * The convex hull of the provided points is computed to form the polygon.
+ *
+ * @static
+ * @method fromArray
+ * @param {Array<Object|qlib.Vector2>} points - An array of point-like objects (having `x` and `y` properties)
+ *                                              or `qlib.Vector2` instances.
+ * @returns {qlib.ConvexPolygon} A new `ConvexPolygon` instance.
+ */
 ConvexPolygon.fromArray = function( points )
 {
 	var cv = new qlib.ConvexPolygon();
-	var p = cv.points;
+	// The line `var p = cv.points;` is unused.
 	for ( var i = 0; i < points.length; i++ )
 	{
+		// Ensure points are qlib.Vector2 if they are not already, or ensure methods handle plain objects.
+		// For simplicity, assuming they are compatible or qlib.Vector2 instances.
 		cv.points.push( points[i] );
 	}
-	cv.updateConvexHull();
+	cv.updateConvexHull(); // This computes the hull and sets points
 	return cv;
 }
 		
 
 	var p = ConvexPolygon.prototype = new qlib.GeometricShape();
+	/**
+	 * The type of this geometric shape.
+	 * @property {string} type
+	 * @default "ConvexPolygon"
+	 */
 	p.type = "ConvexPolygon";
 
+	/**
+	 * Computes the convex hull of the current set of `this.points` using the Monotone Chain algorithm (or similar).
+	 * The `this.points` array is updated to store only the vertices of the convex hull, ordered counter-clockwise.
+	 * Also updates the bounding rectangle and resets the `dirty` flag.
+	 *
+	 * @method updateConvexHull
+	 * @returns {void}
+	 */
 	p.updateConvexHull = function()
 	{
 		this.dirty = false;
 		var points = this.points;
 		
-		points.sort( this.vectorSort );
-		if ( points.length<3)
+		points.sort( this.vectorSort ); // Sort points primarily by x, then by y
+		
+		if ( points.length < 3) // Convex hull is not well-defined for fewer than 3 points (or is just the points themselves)
 		{
+			this.updateBoundingRect(); // Still update bounding rect for lines or single points
 			return;
 		}
-		
-	
 		
 		var n = points.length;
-		var result = [];
-		var bot = 0;
-		var top = -1;
-		var i;
-		var minmin = 0;
-		var minmax;
-		var p;
-		var p_minmin;
-		var p_maxmin;
-		var p_maxmax;
-		var p_minmax;
+		var hull = []; // Use 'hull' for clarity instead of 'result'
 		
-		var xmin = points[0].x;
-		
-		for ( i=1; i<n; i++) 
-		{
-			if ( points[i].x != xmin) 
-			{
-				break;
+		// Build lower hull
+		for (var i = 0; i < n; ++i) {
+			while (hull.length >= 2 && hull[hull.length-2].isLeft(hull[hull.length-1], points[i]) <= 0) {
+				hull.pop();
 			}
-		}
-		minmax = i-1;
-		if (minmax == n-1) 
-		{
-			p =  points[minmin];
-			result[++top] = p;
-			if (points[minmax].y != p.y)
-			{
-				result[++top] = points[minmax];
-			}
-			result[++top] = p;
-			points = result;
-			return;
+			hull.push(points[i]);
 		}
 		
-		var maxmin;
-		var maxmax = n-1;
-		var xmax = points[n-1].x;
-		
-		for (i=n-2; i>=0; i--) 
-		{
-			if ( points[i].x != xmax) 
-			{
-				break;
+		// Build upper hull
+		// `t` stores the size of the lower hull
+		for (var i = n - 2, t = hull.length + 1; i >= 0; --i) {
+			while (hull.length >= t && hull[hull.length-2].isLeft(hull[hull.length-1], points[i]) <= 0) {
+				hull.pop();
 			}
-		}
-		maxmin = i+1;
-		result[++top] = points[minmin];
-		i = minmax;
-		p_minmin = points[minmin];
-		p_maxmin = points[maxmin];
-		
-		while ( ++i <= maxmin ) 
-		{
-			
-			p = points[i];
-			
-			if ( ( p.isLeft( p_minmin, p_maxmin) >= 0 ) && ( i < maxmin ) ) 
-			{
-				continue;
-			}
-			
-			while ( top > 0 ) 
-			{
-				if ( p.isLeft( result[top-1], result[top] ) > 0 ) 
-				{
-					break;
-				} else {
-					top--;
-				}
-			}
-			result[++top] = p;
+			hull.push(points[i]);
 		}
 		
-		p_maxmax = points[maxmax];
-		p_minmax = points[minmax];
+		hull.pop(); // Remove last point (it's same as the first) if more than 1 point in hull
 		
-		if ( maxmax != maxmin ) 
-		{
-			result[++top] = p_maxmax;
-		}
-		
-		bot = top;
-		i = maxmin;
-		
-		while ( --i >= minmax ) 
-		{
-			
-			p = points[i];
-			
-			if ( ( p.isLeft(p_maxmax, p_minmax)>=0 ) && ( i>minmax )) 
-			{
-				continue;
-			}
-			
-			while (top>bot) 
-			{
-				if ( p.isLeft( result[top-1], result[top])>0) 
-				{
-					break;
-				} else {
-					top--;
-				}
-			}
-			result[++top] = p;
-		}
-		
-		if (minmax != minmin ) 
-		{
-			result[++top] = p_minmin;
-		}
-		
-		this.points = result.slice( 0, top );
+		this.points = hull;
 		this.updateBoundingRect();
 	}
 	
+	/**
+	 * Sorts two points primarily by their x-coordinate, and then by their y-coordinate if x-coordinates are equal.
+	 * Used as a comparator for `Array.prototype.sort()`.
+	 *
+	 * @method vectorSort
+	 * @protected
+	 * @param {Object|qlib.Vector2} a - The first point.
+	 * @param {Object|qlib.Vector2} b - The second point.
+	 * @returns {number} -1 if `a` comes before `b`, 1 if `a` comes after `b`, 0 if they are equal in sort order.
+	 */
 	p.vectorSort = function( a, b )
 	{
-		if (a.x<b.x) return -1;
-		if (a.x>b.x) return 1;
-		if (a.x==b.x){
-			if (a.y<b.y) return -1;
-			if (a.y>b.y) return 1;
-		}
+		if (a.x < b.x) return -1;
+		if (a.x > b.x) return 1;
+		// x-coordinates are equal, compare y-coordinates
+		if (a.y < b.y) return -1;
+		if (a.y > b.y) return 1;
 		return 0;
 	}
 	
+	/**
+	 * Calculates and updates the `_boundingRect` property for this polygon
+	 * based on its current `points`.
+	 *
+	 * @method updateBoundingRect
+	 * @protected
+	 * @returns {void}
+	 */
 	p.updateBoundingRect = function()
 	{
 		var points = this.points;
-		var p = points[0];
-		var minX = p.x;
+		if (!points || points.length === 0) {
+			this._boundingRect = new qlib.Rectangle(0,0,0,0);
+			return;
+		}
+		var p_current = points[0]; // Renamed 'p' to 'p_current' to avoid conflict with prototype 'p'
+		var minX = p_current.x;
 		var maxX = minX;
-		var minY = p.y;
+		var minY = p_current.y;
 		var maxY = minY;
 		for ( var i = 1; i< points.length; i++ )
 		{
-			p =  points[i];
-			if ( p.x < minX ) minX = p.x;
-			else if ( p.x > maxX ) maxX = p.x;
-			if ( p.y < minY ) minY = p.y;
-			else if ( p.y > maxY ) maxY = p.y;
+			p_current =  points[i];
+			if ( p_current.x < minX ) minX = p_current.x;
+			else if ( p_current.x > maxX ) maxX = p_current.x;
+			if ( p_current.y < minY ) minY = p_current.y;
+			else if ( p_current.y > maxY ) maxY = p_current.y;
 		}
 		
 		this._boundingRect = new qlib.Rectangle( minX, minY, maxX - minX, maxY - minY );
 	}
 	
+	/**
+	 * Rotates the polygon by a given angle around a specified center point.
+	 * If no center is provided, rotates around the polygon's centroid.
+	 * Modifies the polygon's points in place and sets the `dirty` flag.
+	 *
+	 * @method rotate
+	 * @param {number} angle - The angle of rotation in radians.
+	 * @param {qlib.Vector2} [center] - The point to rotate around. Defaults to the polygon's centroid.
+	 * @returns {qlib.ConvexPolygon} This `ConvexPolygon` instance for chaining.
+	 */
 	p.rotate = function( angle, center )
 	{
 		if ( center == null ) center = this.getCentroid();
 		var points = this.points;
-		for ( var i in points )
+		for ( var i = 0; i < points.length; i++ ) // Use standard loop for arrays
 		{
 			points[i].rotateAround(angle, center );
 		}
-		this.dirty = true;
+		this.dirty = true; // Hull might change if points are not qlib.Vector2 and rotateAround is not in-place
+		this.updateBoundingRect(); // Bounding rect will change
 		return this;
 	}
 	
+	/**
+	 * Scales the polygon by given factors in x and y directions, optionally around a specified center point.
+	 * If no center is provided, scales around the polygon's centroid.
+	 * Modifies the polygon's points in place and sets the `dirty` flag.
+	 *
+	 * @method scale
+	 * @param {number} factorX - The scaling factor for the x-axis.
+	 * @param {number} factorY - The scaling factor for the y-axis.
+	 * @param {qlib.Vector2} [center] - The point to scale around. Defaults to the polygon's centroid.
+	 * @returns {qlib.ConvexPolygon} This `ConvexPolygon` instance for chaining.
+	 */
 	p.scale = function( factorX, factorY, center )
 	{
-		if ( center == null ) center = this.getCentroid();;
+		if ( center == null ) center = this.getCentroid();
 		var points = this.points;
-		for ( var i in points )
+		for ( var i = 0; i < points.length; i++ )
 		{
 			points[i].minus( center ).multiplyXY( factorX, factorY ).plus( center );
 		}
-		this.dirty = true;
+		this.dirty = true; // Hull shape might change if scaling is non-uniform relative to centroid
+		this.updateBoundingRect();
 		return this;
 	}
 	
+	/**
+	 * Translates (moves) the polygon by a given offset vector.
+	 * Modifies the polygon's points in place and sets the `dirty` flag.
+	 *
+	 * @method translate
+	 * @param {qlib.Vector2} offset - The vector representing the translation.
+	 * @returns {qlib.ConvexPolygon} This `ConvexPolygon` instance for chaining.
+	 */
 	p.translate = function( offset )
 	{
 		var points = this.points;
-		for ( var i in points )
+		for ( var i = 0; i < points.length; i++ )
 		{
 			points[i].plus(offset);
 		}
-		this.dirty = true;
+		this.dirty = true; // Hull shape doesn't change, but position does.
+		this.updateBoundingRect();
+		// Centroid also translates by the same offset.
+		if (this.centroid) this.centroid.plus(offset);
 		return this;
 	}
 	
+	/**
+	 * Calculates or returns the cached centroid (geometric center) of the polygon.
+	 * If the `dirty` flag is true, it first updates the convex hull and then recalculates the centroid.
+	 * The centroid calculation uses the formula for the centroid of a non-self-intersecting polygon.
+	 *
+	 * @method getCentroid
+	 * @returns {qlib.Vector2} The centroid of the polygon.
+	 */
 	p.getCentroid = function()
 	{
-		
+		if (this.points.length === 0) return new qlib.Vector2(); // Or throw error
+		if (this.points.length < 3) return this.points[0] ? this.points[0].clone() : new qlib.Vector2(); // Centroid of line/point
+
 		if ( this.dirty ) 
 		{
-			this.updateConvexHull();
+			this.updateConvexHull(); // This also updates bounding rect
 			
-			var sx = 0;
-			var sy = 0;
-			var a = 0;
+			var sx = 0; // Sum for x-coordinate of centroid
+			var sy = 0; // Sum for y-coordinate of centroid
+			var signedArea = 0; // Signed area of the polygon (doubled)
 			
 			var p1;
 			var p2;
-			var f;
+			var factor; // (p1.x * p2.y - p2.x * p1.y)
 			var points = this.points;
 			for ( var i = 0; i< points.length; i++ )
 			{
 				p1 = points[i];
-				p2 = points[(i+1) % points.length];
-				a += ( f = p1.x * p2.y - p2.x * p1.y );
-				sx += (p1.x + p2.x) * f;
-				sy += (p1.y + p2.y) * f;
+				p2 = points[(i+1) % points.length]; // Next vertex, wraps around for last segment
+				factor = (p1.x * p2.y - p2.x * p1.y);
+				signedArea += factor;
+				sx += (p1.x + p2.x) * factor;
+				sy += (p1.y + p2.y) * factor;
 			}
-			
-			if ( a != 0 )
+
+			if ( Math.abs(signedArea) < 1e-9 ) // Check for zero area (degenerate polygon)
 			{
-				f = 1 / ( 3 * a );
+				// For degenerate polygons (e.g. all points collinear), centroid might be average of points
+				// For simplicity, use the first point or average for very small area cases.
+				// Recalculate as simple average if area is effectively zero
+				sx = 0; sy = 0;
+				for(var i=0; i<points.length; ++i) { sx += points[i].x; sy += points[i].y; }
+				this.centroid.x = sx / points.length;
+				this.centroid.y = sy / points.length;
+
 			} else {
-				f = 0;
+				var scale = 1 / ( 3 * signedArea ); // Or 1.0 / (6.0 * (signedArea/2.0))
+				this.centroid.x = sx * scale;
+				this.centroid.y = sy * scale;
 			}
-			this.centroid.x = sx * f;
-			this.centroid.y = sy * f;
+			// `dirty` flag is set to false by updateConvexHull
 		}
 		return this.centroid;
 	}
 	
+	/**
+	 * Draws the polygon on a given canvas rendering context.
+	 * If the `dirty` flag is true, the convex hull is updated first.
+	 * Assumes the canvas context has `moveTo` and `lineTo` methods.
+	 *
+	 * @method draw
+	 * @param {CanvasRenderingContext2D} canvas - The canvas rendering context to draw on.
+	 * @returns {void}
+	 */
 	p.draw = function( canvas )
 	{
 		if ( this.dirty )
@@ -292,14 +348,17 @@ ConvexPolygon.fromArray = function( points )
 			this.updateConvexHull();
 		}
 		var points = this.points;
-		if ( points.length > 0 )
+		if ( points && points.length > 1 ) // Need at least 2 points to draw lines
 		{
-			canvas.moveTo( points[points.length-1].x, points[points.length-1].y );
-			for (var i=0;i<points.length;i++)
+			canvas.moveTo( points[points.length-1].x, points[points.length-1].y ); // Start from the last point to close path
+			for (var i=0; i<points.length; i++)
 			{
 				canvas.lineTo( points[i].x, points[i].y );
 			}
-		} 
+			// canvas.closePath(); // Often used with fill or if a closed stroke is explicitly desired
+		} else if (points && points.length === 1) {
+			// Draw a single point if desired, e.g., canvas.fillRect(points[0].x, points[0].y, 1, 1);
+		}
 	}
 
 	qlib["ConvexPolygon"] = ConvexPolygon;
