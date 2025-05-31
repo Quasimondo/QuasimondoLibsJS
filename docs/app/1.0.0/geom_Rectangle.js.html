@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: geom/Rectangle.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: geom/Rectangle.js</h1>
+
+
+
+
+
+
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+* Rectangle
+*
+* Copyright (c) 2013 Mario Klingemann
+*
+* Permission is hereby granted, free of charge, to any person
+* obtaining a copy of this software and associated documentation
+* files (the "Software"), to deal in the Software without
+* restriction, including without limitation the rights to use,
+* copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the
+* Software is furnished to do so, subject to the following
+* conditions:
+*
+* The above copyright notice and this permission notice shall be
+* included in all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+* OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+// namespace:
+window["qlib"] = window.qlib || {};
+
+(function() {
+
+var Rectangle = function( x, y, width, height ) {
+  this.initialize( x, y, width, height );
+}
+
+var p = Rectangle.prototype = new qlib.GeometricShape();
+
+// public properties:
+	p.type = "Rectangle";
+
+
+	// constructor:
+	/**
+	 * Initialization method.
+	 * @method initialize
+	 * @protected
+	*/
+	p.initialize = function( x, y, width, height ) {
+		this.x = (x == null ? 0 : x);
+		this.y = (y == null ? 0 : y);
+		this.width = (width == null ? 0 : width);
+		this.height = (height == null ? 0 : height);
+		this.fixValues();
+	}
+
+	p.fixValues = function ()
+	{
+		if ( this.width &lt; 0 )
+		{
+			this.x += this.width;
+			this.width *= -1;
+		}
+		if ( this.height &lt; 0 )
+		{
+			this.y += this.height;
+			this.height *= -1;
+		}
+	}
+
+	p.scale = function( factorX, factorY, center )
+	{
+		if ( center == null ) center = new qlib.Vector2( this.x + this.width * 0.5, this.y + this.height * 0.5);
+		var newXY = new qlib.Vector2( this.x, this.y).minus( center ).multiplyXY( factorX, factorY ).plus( center );
+		this.x = newXY.x;
+		this.y = newXY.y;
+		this.width *= factorX;
+		this.height *= factorY;
+		this.fixValues();
+		return this;
+	}
+
+	p.union = function( rect )
+	{
+		if ( this.width == 0 || this.height == 0 )
+		{
+			return rect.clone();
+		}
+		if ( rect.width == 0 || rect.height == 0 )
+		{
+			return this.clone();
+		}
+		var minx = Math.min( this.x, rect.x );
+		var miny = Math.min( this.y, rect.y );
+		var maxx = Math.max( this.x + this.width, rect.x + rect.width);
+		var maxy = Math.max( this.y + this.height, rect.y + rect.height);
+		return new qlib.Rectangle( minx, miny, maxx - minx, maxy - miny );
+
+	}
+
+	p.intersection = function( rect )
+	{
+		if ( this.width == 0 || this.height == 0 )
+		{
+			return rect.clone();
+		}
+		if ( rect.width == 0 || rect.height == 0 )
+		{
+			return this.clone();
+		}
+		this.fixValues();
+		rect.fixValues();
+
+		var minX = this.x > rect.x ? this.x : rect.x;
+		var minY = this.y > rect.y ? this.y : rect.y;
+		var maxX = Math.min(this.x + this.width, rect.x + rect.width);
+		var maxY = Math.min(this.y + this.height, rect.y + rect.height);
+		if ( minX >= maxX || minY >= maxY ) return new qlib.Rectangle( );
+		return new qlib.Rectangle( minX, minY, maxX - minX, maxY - minY );
+
+	}
+
+	p.getCenter = function()
+	{
+		return new qlib.Vector2( this.x + this.width*0.5, this.y + this.height*0.5);
+	}
+
+	p.__defineGetter__("topLeft", function(){return new qlib.Point(this.x,this.y);});
+
+// public methods:
+	/**
+	 * Returns a clone of the Rectangle instance.
+	 * @method clone
+	 * @return {Rectangle} a clone of the Rectangle instance.
+	 **/
+	p.clone = function( deepClone ) {
+		return new Rectangle( this.x, this.y, this.width, this.height );
+	}
+
+	p.draw = function( graphics )
+	{
+		graphics.drawRect(this.x, this.y, this.width, this.height );
+	}
+
+	/**
+	 * Returns a string representation of this object.
+	 * @method toString
+	 * @return {String} a string representation of the instance.
+	 **/
+	p.toString = function() {
+		return "qlib.Rectangle("+this.x+","+this.y+","+this.width+","+this.height+")";
+	}
+
+	qlib["Rectangle"] = Rectangle;
+}());</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LineSegment.html">LineSegment</a></li><li><a href="Point.html">Point</a></li><li><a href="Vector2.html">Vector2</a></li></ul><h3>Global</h3><ul><li><a href="global.html#append">append</a></li><li><a href="global.html#appendArray">appendArray</a></li><li><a href="global.html#appendMatrix">appendMatrix</a></li><li><a href="global.html#appendProperties">appendProperties</a></li><li><a href="global.html#appendTransform">appendTransform</a></li><li><a href="global.html#clone">clone</a></li><li><a href="global.html#decompose">decompose</a></li><li><a href="global.html#identity">identity</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#invert">invert</a></li><li><a href="global.html#isIdentity">isIdentity</a></li><li><a href="global.html#prepend">prepend</a></li><li><a href="global.html#prependArray">prependArray</a></li><li><a href="global.html#prependMatrix">prependMatrix</a></li><li><a href="global.html#prependProperties">prependProperties</a></li><li><a href="global.html#prependTransform">prependTransform</a></li><li><a href="global.html#rotate">rotate</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#skew">skew</a></li><li><a href="global.html#toString">toString</a></li><li><a href="global.html#translate">translate</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 31 2025 06:36:44 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

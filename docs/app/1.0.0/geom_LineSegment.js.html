@@ -1,8 +1,36 @@
-/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: geom/LineSegment.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: geom/LineSegment.js</h1>
+
+
+
+
+
+
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
 * LineSegment
 *
 * Copyright (c) 2013 Mario Klingemann
-* 
+*
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
 * files (the "Software"), to deal in the Software without
@@ -11,10 +39,10 @@
 * copies of the Software, and to permit persons to whom the
 * Software is furnished to do so, subject to the following
 * conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be
 * included in all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -59,24 +87,24 @@ this.qlib = this.qlib || {};
 	 * @default "LineSegment"
 	 */
 	p.type = "LineSegment";
-	
+
 	// constructor:
-	/** 
+	/**
 	 * Initializes the LineSegment object.
 	 * @param {IArguments} args - The arguments passed to the constructor.
 	 * @protected
 	*/
-	p.initialize = function( args ) 
+	p.initialize = function( args )
 	{
 		if ( args.length == 0 )
-		{ 
+		{
 			this.p1 = new qlib.Vector2();
 			this.p2 = new qlib.Vector2();
 		} else if ( typeof args[0] === "number" )
-		{	
+		{
 			this.p1 = new qlib.Vector2( args[0], args[1] );
 			if ( typeof args[2] === "number" )
-			{	
+			{
 				this.p2 = new qlib.Vector2( args[2], args[3] );
 			} else {
 				this.p2 = args[2];
@@ -84,28 +112,28 @@ this.qlib = this.qlib || {};
 		} else {
 			this.p1 = args[0];
 			if ( typeof args[1] === "number" )
-			{	
+			{
 				this.p2 = new qlib.Vector2( args[1], args[2] );
 			} else {
 				this.p2 = args[1];
 			}
 		}
-		
+
 		this.p1_end = true;
 		this.p2_end = true;
-	
+
 	};
-	
+
 	/**
 	 * Gets a point on the line segment at a given parameter t.
 	 * @param {number} t - The parameter (0.0 for p1, 1.0 for p2).
 	 * @returns {qlib.Vector2} The point on the line segment.
 	 */
-	p.getPoint = function( t ) 
+	p.getPoint = function( t )
 	{
 		return this.p1.getLerp(this.p2,t);
 	};
-	
+
 	/**
 	 * Gets the normal vector of the line segment.
 	 * @returns {qlib.Vector2} The normal vector.
@@ -114,7 +142,7 @@ this.qlib = this.qlib || {};
 	{
 		return new qlib.Vector2(this.p1, this.p2).getNormal();
 	};
-	
+
 	/**
 	 * Gets the normal vector at any point on the line segment (which is constant).
 	 * @returns {qlib.Vector2} The normal vector.
@@ -123,7 +151,7 @@ this.qlib = this.qlib || {};
 	{
 		return this.getNormal();
 	};
-	
+
 	/**
 	 * Scales the line segment by given factors around a center point.
 	 * @param {number} factorX - The scaling factor for the x-axis.
@@ -138,7 +166,7 @@ this.qlib = this.qlib || {};
 		this.p2.minus( center ).multiplyXY( factorX, factorY ).plus( center );
 		return this;
 	};
-	
+
 	/**
 	 * Rotates the line segment by a given angle around a center point.
 	 * @param {number} angle - The angle of rotation in radians.
@@ -148,12 +176,12 @@ this.qlib = this.qlib || {};
 	p.rotate = function( angle, center )
 	{
 		if ( center == null ) center = this.p1.getLerp( this.p2, 0.5 );
-		
+
 		this.p1.rotateAround(angle, center );
 		this.p2.rotateAround(angle, center );
 		return this;
 	}
-		
+
 	/**
 	 * Gets the parameter 't' of the closest point on the infinite line (defined by p1 and p2) to a given point.
 	 * 't' can be outside the range [0, 1].
@@ -166,15 +194,15 @@ this.qlib = this.qlib || {};
 		var Dy = this.p2.y - this.p1.y;
 		var DdD = Dx*Dx + Dy*Dy;
 		if ( DdD == 0 ) return 0;
-		
+
 		var YmP0x = pt.x - this.p1.x;
 		var YmP0y = pt.y - this.p1.y;
 		var t =  YmP0x * Dx + YmP0y * Dy;
-		
+
 		return t / DdD;
-	
+
 	};
-	
+
 	/**
 	 * Gets the closest point on the infinite line (defined by p1 and p2) to a given point.
 	 * @param {qlib.Vector2} pt - The point.
@@ -182,49 +210,49 @@ this.qlib = this.qlib || {};
 	 */
 	p.getClosestPointOnLine = function( pt )
 	{
-		var Dx = this.p2.x - this.p1.x, 
+		var Dx = this.p2.x - this.p1.x,
 			Dy = this.p2.y - this.p1.y,
 			YmP0x = pt.x - this.p1.x,
 			YmP0y = pt.y - this.p1.y,
 			t = YmP0x * Dx + YmP0y * Dy,
 			DdD = Dx*Dx + Dy*Dy;
-		
-		if (DdD === 0) 
+
+		if (DdD === 0)
 		{
 			return new qlib.Vector2( this.p1 );
 		}
-		
+
 		return this.p1.getLerp( this.p2, t / DdD );
 	};
-	
+
 	/**
 	 * Calculates the squared distance from a point to this line segment.
 	 * @param {qlib.Vector2} pt - The point.
 	 * @returns {number} The squared distance.
 	 */
-	p.squaredDistanceToPoint = function( pt ) 
+	p.squaredDistanceToPoint = function( pt )
 	{
 		var D = new qlib.Vector2(this.p1, this.p2),
 			YmP0 = new qlib.Vector2(this.p1, pt),
 			t = D.dot(YmP0);
-		if (t<=0) 
+		if (t&lt;=0)
 		{
 			return YmP0.dot(YmP0);
 		}
 		var DdD = D.dot(D);
-		if (t>=DdD) 
+		if (t>=DdD)
 		{
 			var YmP1 = new qlib.Vector2(pt, this.p2);
 			return YmP1.dot(YmP1);
 		}
 		return YmP0.dot(YmP0)-t*t/DdD;
 	};
-	
+
 	/**
 	 * Splits this line segment into two new line segments at a given parameter t.
 	 * @param {number} t - The parameter at which to split (0.0 to 1.0).
 	 * @param {boolean} [clonePoints=true] - Whether to clone the points for the new segments.
-	 * @returns {Array<qlib.LineSegment>} An array containing one or two line segments.
+	 * @returns {Array&lt;qlib.LineSegment>} An array containing one or two line segments.
 	 * If t is 0 or 1, returns an array with a clone of this segment (or this segment itself if clonePoints is false).
 	 * If t is outside [0,1], returns an empty array.
 	 */
@@ -236,16 +264,16 @@ this.qlib = this.qlib || {};
 		{
 			result.push( clonePoints ? this.clone() : this );
 		}
-		if ( t<=0 || t>=1) return result; // Corrected condition to return if t is outside [0,1]
-		
+		if ( t&lt;=0 || t>=1) return result; // Corrected condition to return if t is outside [0,1]
+
 		var p_t = this.getPoint( t );
-		
+
 		result.push( new qlib.LineSegment( clonePoints ? this.p1.clone() : this.p1, p_t));
 		result.push( new qlib.LineSegment( clonePoints ? p_t.clone() : p_t, clonePoints ? this.p2.clone() : this.p2));
-		
+
 		return result;
 	}
-	
+
 	/**
 	 * Gets the mirror image of a point across the infinite line defined by this segment.
 	 * @param {qlib.Vector2} p - The point to mirror.
@@ -256,18 +284,18 @@ this.qlib = this.qlib || {};
 		var Dx = this.p2.x - this.p1.x,
 			Dy = this.p2.y - this.p1.y,
 			DdD = Dx*Dx + Dy*Dy;
-		if (DdD === 0) 
+		if (DdD === 0)
 		{
 			return p.getMirror( this.p1 );
 		}
-		
+
 		var YmP0x = p.x - this.p1.x,
 			YmP0y = p.y - this.p1.y,
 			t = YmP0x * Dx + YmP0y * Dy;
-		
+
 		return p.getMirror( this.p1.getLerp( this.p2, t / DdD ) );
 	};
-	
+
 	/**
 	 * Mirrors a point across the infinite line defined by this segment (modifies the input point).
 	 * @param {qlib.Vector2} p - The point to mirror.
@@ -275,23 +303,23 @@ this.qlib = this.qlib || {};
 	 */
 	p.mirrorPoint = function( p )
 	{
-		
+
 		var Dx = this.p2.x - this.p1.x,
 			Dy = this.p2.y - this.p1.y,
 			DdD = Dx*Dx + Dy*Dy;
-			
-		if (DdD === 0) 
+
+		if (DdD === 0)
 		{
 			return p.mirror( this.p1 );
 		}
-		
+
 		var YmP0x = p.x - this.p1.x,
 			YmP0y = p.y - this.p1.y,
 			t = YmP0x * Dx + YmP0y * Dy;
-		
+
 		return p.mirror( this.p1.getLerp( this.p2, t / DdD ) );
 	};
-	
+
 	/**
 	 * Determines if a point is to the left of this directed line segment.
 	 * @param {qlib.Vector2} p - The point to check.
@@ -301,7 +329,7 @@ this.qlib = this.qlib || {};
 	{
 		return (this.p2.x-this.p1.x)*(p.y-this.p1.y)-(p.x-this.p1.x)*(this.p2.y-this.p1.y);
 	};
-	
+
 	/**
 	 * Gets the slope of the line segment.
 	 * @returns {number} The slope. Returns Infinity or -Infinity if the line is vertical.
@@ -310,7 +338,7 @@ this.qlib = this.qlib || {};
 	{
 		return (this.p2.y-this.p1.y) / (this.p2.x-this.p1.x);
 	};
-	
+
 	/**
 	 * Gets the y-intercept of the infinite line defined by this segment.
 	 * @returns {number} The y-intercept.
@@ -319,13 +347,13 @@ this.qlib = this.qlib || {};
 	{
 		return this.p1.y - this.getSlope() * this.p1.x;
 	};
-	
+
 	/**
 	 * Calculates the intersection point(s) with another line segment.
 	 * @param {qlib.LineSegment} l - The other line segment.
 	 * @param {boolean} [onlyInThisSegment=false] - If true, only considers intersections within this segment's bounds.
 	 * @param {boolean} [onlyInOtherSegment=false] - If true, only considers intersections within the other segment's bounds. (Note: the original code had a typo here, it should likely be `onlyInOtherSegment`)
-	 * @returns {Array<qlib.Vector2>} An array of intersection points.
+	 * @returns {Array&lt;qlib.Vector2>} An array of intersection points.
 	 */
 	p.getIntersection = function( l, onlyInThisSegment, onlyInOtherSegment)
 	{
@@ -335,17 +363,17 @@ this.qlib = this.qlib || {};
 		var ua_t = (l.p2.x-l.p1.x)*(this.p1.y-l.p1.y)-(l.p2.y-l.p1.y)*(this.p1.x-l.p1.x);
 		var ub_t = (this.p2.x-this.p1.x)*(this.p1.y-l.p1.y)-(this.p2.y-this.p1.y)*(this.p1.x-l.p1.x);
 		var u_b  = (l.p2.y-l.p1.y)*(this.p2.x-this.p1.x)-(l.p2.x-l.p1.x)*(this.p2.y-this.p1.y);
-		
-		if (u_b != 0) 
+
+		if (u_b != 0)
 		{
 			var ua = ua_t/u_b;
 			var ub = ub_t/u_b;
 			// Corrected logic for segment checks
-			var inThis = ua >= 0 && ua <= 1;
-			var inOther = ub >= 0 && ub <= 1;
+			var inThis = ua >= 0 &amp;&amp; ua &lt;= 1;
+			var inOther = ub >= 0 &amp;&amp; ub &lt;= 1;
 
-			if (onlyInThisSegment && !inThis) return result;
-			if (onlyInOtherSegment && !inOther) return result;
+			if (onlyInThisSegment &amp;&amp; !inThis) return result;
+			if (onlyInOtherSegment &amp;&amp; !inOther) return result;
 
 			result.push( new qlib.Vector2(this.p1.x+ua*(this.p2.x-this.p1.x), this.p1.y+ua*(this.p2.y-this.p1.y)) );
 		} else if ( onlyInThisSegment ) { // Handling collinear cases
@@ -356,7 +384,7 @@ this.qlib = this.qlib || {};
 		}
 		return result;
 	};
-	
+
 	/**
 	 * Gets the closest point on this line segment to a given point.
 	 * @param {qlib.Vector2} pt - The point.
@@ -369,26 +397,26 @@ this.qlib = this.qlib || {};
 			YmP0x = pt.x - this.p1.x,
 			YmP0y = pt.y - this.p1.y,
 			t = YmP0x * Dx + YmP0y * Dy;
-		
-		if ( t <= 0) 
+
+		if ( t &lt;= 0)
 		{
 			return new qlib.Vector2( this.p1 );
 		}
-		
+
 		var DdD = Dx*Dx + Dy*Dy;
-		if ( t >= DdD ) 
+		if ( t >= DdD )
 		{
 			return new qlib.Vector2( this.p2 );
 		}
-		
-		if (DdD === 0) 
+
+		if (DdD === 0)
 		{
 			return new qlib.Vector2( this.p1 );
 		}
-		
+
 		return this.p1.getLerp( this.p2, t / DdD );
 	};
-	
+
 	/**
 	 * Gets the bounding rectangle of this line segment.
 	 * @returns {qlib.Rectangle} The bounding rectangle.
@@ -399,7 +427,7 @@ this.qlib = this.qlib || {};
 		var size = this.p1.getMax( this.p2 ).minus( minP );
 		return new qlib.Rectangle( minP.x, minP.y , size.x, size.y  );
 	}
-	
+
 	/**
 	 * Creates a new line segment parallel to this one, at a given distance.
 	 * @param {number} d - The distance for the parallel segment. Positive for one side, negative for the other.
@@ -411,7 +439,7 @@ this.qlib = this.qlib || {};
 			n = v.getNormal().multiply(d);
 		return new qlib.LineSegment( this.p1.getPlus(n), this.p2.getPlus(n) );
 	};
-	
+
 	/**
 	 * Moves the drawing context to the start point of the line segment.
 	 * @param {CanvasRenderingContext2D} g - The graphics context.
@@ -421,7 +449,7 @@ this.qlib = this.qlib || {};
 	{
 		g.moveTo( this.p1.x + ( offset != null ? offset.x : 0 ), this.p1.y + ( offset != null ? offset.y : 0 ) );
 	};
-	
+
 	/**
 	 * Moves the drawing context to the end point of the line segment.
 	 * @param {CanvasRenderingContext2D} g - The graphics context.
@@ -431,18 +459,18 @@ this.qlib = this.qlib || {};
 	{
 		g.moveTo( this.p2.x+ ( offset != null ? offset.x : 0 ), this.p2.y + ( offset != null ? offset.y : 0 ) );
 	};
-	
+
 	/**
 	 * Draws the line segment on a graphics context.
 	 * @param {CanvasRenderingContext2D} g - The graphics context.
 	 * @param {qlib.Vector2} [offset] - An optional offset to apply.
 	 */
-	p.draw = function( g, offset ) 
+	p.draw = function( g, offset )
 	{
 		g.moveTo( this.p1.x+ ( offset != null ? offset.x : 0 ), this.p1.y + ( offset != null ? offset.y : 0 ) );
 		g.lineTo( this.p2.x+ ( offset != null ? offset.x : 0 ), this.p2.y + ( offset != null ? offset.y : 0 ) );
 	};
-	
+
 	/**
 	 * Draws a line from the current drawing context position to the end point of this segment.
 	 * @param {CanvasRenderingContext2D} g - The graphics context.
@@ -452,7 +480,7 @@ this.qlib = this.qlib || {};
 	{
 		g.lineTo( this.p2.x+ ( offset != null ? offset.x : 0 ), this.p2.y + ( offset != null ? offset.y : 0 ) );
 	};
-	
+
 	/**
 	 * Draws extra visual elements for debugging or visualization (normals, endpoints).
 	 * @param {CanvasRenderingContext2D} g - The graphics context.
@@ -474,38 +502,38 @@ this.qlib = this.qlib || {};
 			g.moveTo(  this.p2.x + offset.x,  this.p2.y  + offset.y);
 			g.lineTo( p.p2.x + offset.x, p.p2.y  + offset.y);
 		}
-		
+
 		p = this.getParallel( 5 );
 		p.draw( g, offset );
 		factor = factor || 1;
 		this.p1.draw(g,factor, offset);
 		this.p2.draw(g,factor, offset);
 	};
-	
+
 	/**
 	 * Gets the angle of the line segment in radians.
 	 * @type {number}
 	 */
 	p.__defineGetter__("angle", function(){return this.p1.getAngleTo( this.p2 );});
-	
+
 	/**
 	 * Gets the length of the line segment.
 	 * @type {number}
 	 */
 	p.__defineGetter__("length", function(){return this.p1.distanceToVector( this.p2 );});
-	
+
 	// public methods:
 	/**
 	 * Returns a clone of the LineSegment instance.
 	 * @param {boolean} [deepClone=false] - If true, creates new Vector2 instances for p1 and p2. Otherwise, p1 and p2 are references.
 	 * @returns {qlib.LineSegment} a clone of the LineSegment instance.
 	 **/
-	p.clone = function( deepClone ) 
+	p.clone = function( deepClone )
 	{
 		if ( deepClone === true )
 		{
 			return new qlib.LineSegment(this.p1.x, this.p1.y, this.p2.x, this.p2.y);
-		} 
+		}
 		return new qlib.LineSegment( this.p1, this.p2 );
 	};
 
@@ -513,11 +541,11 @@ this.qlib = this.qlib || {};
 	 * Returns a string representation of this object.
 	 * @returns {string} a string representation of the instance.
 	 **/
-	p.toString = function() 
+	p.toString = function()
 	{
 		return "LineSegment (" + this.p1.toString() + " - " + this.p2.toString() + ")";
 	};
-	
+
 	/**
 	 * Creates a new LineSegment from a point, an angle, and a length.
 	 * @static
@@ -538,6 +566,28 @@ this.qlib = this.qlib || {};
 		}
 		return line;
 	};
-	
+
 	qlib["LineSegment"] = LineSegment;
-}());
+}());</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LineSegment.html">LineSegment</a></li><li><a href="Point.html">Point</a></li><li><a href="Vector2.html">Vector2</a></li></ul><h3>Global</h3><ul><li><a href="global.html#append">append</a></li><li><a href="global.html#appendArray">appendArray</a></li><li><a href="global.html#appendMatrix">appendMatrix</a></li><li><a href="global.html#appendProperties">appendProperties</a></li><li><a href="global.html#appendTransform">appendTransform</a></li><li><a href="global.html#clone">clone</a></li><li><a href="global.html#decompose">decompose</a></li><li><a href="global.html#identity">identity</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#invert">invert</a></li><li><a href="global.html#isIdentity">isIdentity</a></li><li><a href="global.html#prepend">prepend</a></li><li><a href="global.html#prependArray">prependArray</a></li><li><a href="global.html#prependMatrix">prependMatrix</a></li><li><a href="global.html#prependProperties">prependProperties</a></li><li><a href="global.html#prependTransform">prependTransform</a></li><li><a href="global.html#rotate">rotate</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#skew">skew</a></li><li><a href="global.html#toString">toString</a></li><li><a href="global.html#translate">translate</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 31 2025 06:36:44 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

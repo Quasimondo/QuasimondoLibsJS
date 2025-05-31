@@ -1,8 +1,36 @@
-/*
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: geom/Vector2.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: geom/Vector2.js</h1>
+
+
+
+
+
+
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
 * Vector2
 *
 * Copyright (c) 2013 Mario Klingemann
-* 
+*
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
 * files (the "Software"), to deal in the Software without
@@ -11,10 +39,10 @@
 * copies of the Software, and to permit persons to whom the
 * Software is furnished to do so, subject to the following
 * conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be
 * included in all copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
 * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -32,7 +60,7 @@ window["qlib"] = window.qlib || {};
 /**
  * Represents a 2D vector.
  * @class Vector2
- * @param {number|qlib.Point|Array<qlib.Point>} [arg1] - If a number, the x-coordinate. If a Point, the vector will be initialized with the Point's coordinates. If an array of two Points, the vector will be the difference between the two points (args[1] - args[0]).
+ * @param {number|qlib.Point|Array&lt;qlib.Point>} [arg1] - If a number, the x-coordinate. If a Point, the vector will be initialized with the Point's coordinates. If an array of two Points, the vector will be the difference between the two points (args[1] - args[0]).
  * @param {number} [arg2] - If arg1 is a number, this is the y-coordinate.
  * @property {number} x - The x-component of the vector.
  * @property {number} y - The y-component of the vector.
@@ -42,48 +70,48 @@ var Vector2 = function() {
   this.initialize(arguments);
 }
 var p = Vector2.prototype;
-	
+
 // public properties:
 
-	/** 
+	/**
 	 * The x-component of the vector.
 	 * @property x
 	 * @type {number}
 	 **/
 	p.x = 0;
-	
-	/** 
+
+	/**
 	 * The y-component of the vector.
 	 * @property y
 	 * @type {number}
 	 **/
 	p.y = 0;
-	
+
 // constructor:
-	/** 
+	/**
 	 * Initializes the Vector2 object.
 	 * @param {IArguments} args - The arguments passed to the constructor.
 	 * @protected
 	*/
-	p.initialize = function(args) 
+	p.initialize = function(args)
 	{
 		if (args.length == 0)
-		{ 
+		{
 			this.x = this.y = 0;
 		} else if ( typeof args[0] == "number" )
-		{	
+		{
 			this.x = ( args[0] == null ? 0 : args[0]);
 			this.y = ( args[1] == null ? 0 : args[1]);
-		} else if ( args.length == 2 && args[0].x != null && args[0].y != null && args[1].x != null && args[1].y != null)
+		} else if ( args.length == 2 &amp;&amp; args[0].x != null &amp;&amp; args[0].y != null &amp;&amp; args[1].x != null &amp;&amp; args[1].y != null)
 		{
 			this.x = args[1].x - args[0].x;
 			this.y = args[1].y - args[0].y;
-		} else if (args.length == 1 && args[0].x != null && args[0].y != null ) {
+		} else if (args.length == 1 &amp;&amp; args[0].x != null &amp;&amp; args[0].y != null ) {
 			this.x = args[0].x;
 			this.y = args[0].y;
 		}
 	}
-	
+
 // public methods:
 	/**
 	 * Sets the components of the vector.
@@ -94,10 +122,10 @@ var p = Vector2.prototype;
 	p.setValue = function()
 	{
 		if (arguments.length == 0)
-		{ 
+		{
 			this.x = this.y = 0;
 		} else if ( typeof arguments[0] == "number" )
-		{	
+		{
 			this.x = ( arguments[0] == null ? 0 : arguments[0]);
 			this.y = ( arguments[1] == null ? 0 : arguments[1]);
 		} else {
@@ -123,7 +151,7 @@ var p = Vector2.prototype;
 		var dy = this.y - v.y;
 		return dx * dx + dy * dy;
 	}
-	
+
 	/**
 	 * Calculates the distance to another vector.
 	 * @param {qlib.Vector2} v - The other vector.
@@ -133,7 +161,7 @@ var p = Vector2.prototype;
 	{
 		return Math.sqrt( this.squaredDistanceToVector(v) );
 	}
-	
+
 	/**
 	 * Creates a new vector by linear interpolation between this vector and another vector.
 	 * @param {qlib.Vector2} v - The other vector.
@@ -144,7 +172,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( this.x + (v.x - this.x) * l, this.y + (v.y - this.y) * l );
 	}
-		
+
 	/**
 	 * Performs a linear interpolation between this vector and another vector.
 	 * @param {qlib.Vector2} v - The other vector.
@@ -164,27 +192,27 @@ var p = Vector2.prototype;
 	 * @param {number} [squaredSnapDistance=0.00000001] - The squared distance to check against.
 	 * @returns {boolean} True if the vectors are within the specified distance, false otherwise.
 	 */
-	p.snaps = function( v, squaredSnapDistance ) 
+	p.snaps = function( v, squaredSnapDistance )
 	{
-		return this.squaredDistanceToVector( v ) < ( squaredSnapDistance == null ? 0.00000001 : squaredSnapDistance);
+		return this.squaredDistanceToVector( v ) &lt; ( squaredSnapDistance == null ? 0.00000001 : squaredSnapDistance);
 	};
-	
+
 	/**
 	 * Checks if this vector is equal to another vector.
 	 * @param {qlib.Vector2} v - The other vector.
 	 * @returns {boolean} True if the vectors are equal, false otherwise.
 	 */
-	p.equals = function ( v ) 
+	p.equals = function ( v )
 	{
-		return (this.x == v.x && this.y == v.y);
+		return (this.x == v.x &amp;&amp; this.y == v.y);
 	};
-	
+
 	/**
 	 * Gets the length (magnitude) of the vector.
 	 * @type {number}
 	 */
 	p.__defineGetter__("length", function(){ return this.getLength();});
-	
+
 	/**
 	 * Calculates the length (magnitude) of the vector.
 	 * @returns {number} The length of the vector.
@@ -193,7 +221,7 @@ var p = Vector2.prototype;
 	{
 		return Math.sqrt( this.x * this.x + this.y * this.y );
 	}
-		
+
 	/**
 	 * Calculates the squared length of the vector.
 	 * @returns {number} The squared length of the vector.
@@ -202,7 +230,7 @@ var p = Vector2.prototype;
 	{
 		return this.x * this.x + this.y * this.y;
 	}
-		
+
 	/**
 	 * Calculates the angle of the vector in radians.
 	 * @returns {number} The angle of the vector.
@@ -211,7 +239,7 @@ var p = Vector2.prototype;
 	{
 		return Math.atan2( this.y , this.x );
 	}
-	
+
 	/**
 	 * Calculates the angle to another vector in radians.
 	 * @param {qlib.Vector2} v - The other vector.
@@ -221,7 +249,7 @@ var p = Vector2.prototype;
 	{
 		return Math.atan2( v.y - this.y, v.x - this.x );
 	};
-	
+
 	/**
 	 * Sets the length of the vector.
 	 * @param {number} len - The new length.
@@ -233,10 +261,10 @@ var p = Vector2.prototype;
 		if ( l == 0 ) return this;
 		this.x *= len / l;
 		this.y *= len / l;
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector with the same direction as this vector but a new length.
 	 * @param {number} len - The new length.
@@ -247,7 +275,7 @@ var p = Vector2.prototype;
 		var l = this.getLength();
 		return new qlib.Vector2( this.x / l * len, this.y / l * len );
 	}
-	
+
 	/**
 	 * Adds another vector to this vector.
 	 * @param {qlib.Vector2} v - The vector to add.
@@ -259,7 +287,7 @@ var p = Vector2.prototype;
 		this.y += v.y;
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by adding another vector to this vector.
 	 * @param {qlib.Vector2} v - The vector to add.
@@ -269,7 +297,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( this.x + v.x, this.y + v.y );
 	}
-	
+
 	/**
 	 * Adds x and y components to this vector.
 	 * @param {number} tx - The x component to add.
@@ -282,7 +310,7 @@ var p = Vector2.prototype;
 		this.y += ty;
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by adding x and y components to this vector.
 	 * @param {number} tx - The x component to add.
@@ -293,7 +321,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( this.x + tx, this.y + ty );
 	}
-	
+
 	/**
 	 * Subtracts another vector from this vector.
 	 * @param {qlib.Vector2} v - The vector to subtract.
@@ -305,7 +333,7 @@ var p = Vector2.prototype;
 		this.y -= v.y;
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by subtracting another vector from this vector.
 	 * @param {qlib.Vector2} v - The vector to subtract.
@@ -315,7 +343,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( this.x - v.x, this.y - v.y );
 	}
-	
+
 	/**
 	 * Multiplies this vector by a scalar.
 	 * @param {number} f - The scalar value.
@@ -327,7 +355,7 @@ var p = Vector2.prototype;
 		this.y *= f;
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by multiplying this vector by a scalar.
 	 * @param {number} f - The scalar value.
@@ -337,7 +365,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( this.x * f, this.y * f );
 	}
-	
+
 	/**
 	 * Multiplies the components of this vector by scalars.
 	 * @param {number} fx - The scalar for the x component.
@@ -350,7 +378,7 @@ var p = Vector2.prototype;
 		this.y *= fy;
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by multiplying the components of this vector by scalars.
 	 * @param {number} fx - The scalar for the x component.
@@ -361,7 +389,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( this.x * fx, this.y * fy );
 	}
-	
+
 	/**
 	 * Divides this vector by a scalar.
 	 * @param {number} d - The scalar value.
@@ -373,7 +401,7 @@ var p = Vector2.prototype;
 		this.y /= d;
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by dividing this vector by a scalar.
 	 * @param {number} d - The scalar value.
@@ -383,7 +411,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( this.x / d, this.y / d );
 	}
-	
+
 	/**
 	 * Creates a new vector by adding a vector defined by polar coordinates (angle and length) to this vector.
 	 * @param {number} angle - The angle in radians.
@@ -394,7 +422,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2 (this.x + Math.cos ( angle ) * length, this.y + Math.sin ( angle ) * length );
 	}
-	
+
 	/**
 	 * Adds a vector defined by polar coordinates (angle and length) to this vector.
 	 * @param {number} angle - The angle in radians.
@@ -407,7 +435,7 @@ var p = Vector2.prototype;
 		this.y += Math.sin ( angle ) * length;
 		return this;
 	}
-	
+
 	/**
 	 * Calculates the dot product of this vector and another vector.
 	 * @param {qlib.Vector2} v - The other vector.
@@ -417,7 +445,7 @@ var p = Vector2.prototype;
 	{
 		return this.x * v.x + this.y * v.y;
 	}
-	
+
 	/**
 	 * Calculates the cross product of this vector and another vector.
 	 * In 2D, the cross product is a scalar.
@@ -428,7 +456,7 @@ var p = Vector2.prototype;
 	{
 		return this.x * v.y - this.y * v.x;
 	}
-		
+
 	/**
 	 * Calculates the angle between this vector and another vector.
 	 * @param {qlib.Vector2} v - The other vector.
@@ -438,7 +466,7 @@ var p = Vector2.prototype;
 	{
 		return Math.acos ( this.dot( v ) / ( this.getLength() * v.getLength() ) );
 	}
-	
+
 	/**
 	 * Calculates the corner angle formed by this vector and two other vectors.
 	 * This vector is treated as the vertex of the angle.
@@ -455,7 +483,7 @@ var p = Vector2.prototype;
 		}
 		return v1.getMinus(this).angleBetween( v2.getMinus(this) );
 	}
-	
+
 	/**
 	 * Determines the winding direction of the triangle formed by this point and two other points.
 	 * @param {qlib.Vector2} p0 - The first point.
@@ -465,12 +493,12 @@ var p = Vector2.prototype;
 	p.windingDirection = function( p0, p1 )
 	{
 		var result = (p0.x - p1.x) * (p1.y - this.y) - (p0.y - p1.y) * (p1.x - this.x);
-		if (result < 0) return -1;	
-		if (result > 0) return  1;	
+		if (result &lt; 0) return -1;
+		if (result > 0) return  1;
 		return 0;
-		
+
 	}
-	
+
 	/**
 	 * Resets the vector to (0,0).
 	 * @returns {qlib.Vector2} This vector.
@@ -480,7 +508,7 @@ var p = Vector2.prototype;
 		this.x = this.y = 0;
 		return this;
 	}
-	
+
 	/**
 	 * Reflects this vector across a normal vector.
 	 * @param {qlib.Vector2} normal - The normal vector.
@@ -489,13 +517,13 @@ var p = Vector2.prototype;
 	p.reflect = function( normal )
 	{
 		var dp = 2 * this.dot( normal );
-		
+
 		this.x -= normal.x * dp;
 		this.y -= normal.y * dp;
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by reflecting this vector across a normal vector.
 	 * @param {qlib.Vector2} normal - The normal vector.
@@ -504,10 +532,10 @@ var p = Vector2.prototype;
 	p.getReflect = function( normal )
 	{
 		var dp = 2 * this.dot( normal );
-		
+
 		return new qlib.Vector2( this.x - normal.x * dp, this.y - normal.y * dp );
 	}
-	
+
 	/**
 	 * Mirrors this vector across another vector (point).
 	 * @param {qlib.Vector2} vector - The vector (point) to mirror across.
@@ -515,13 +543,13 @@ var p = Vector2.prototype;
 	 */
 	p.mirror = function( vector )
 	{
-		
+
 		this.x = 2 * vector.x - this.x;
 		this.y = 2 * vector.y - this.y;
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by mirroring this vector across another vector (point).
 	 * @param {qlib.Vector2} vector - The vector (point) to mirror across.
@@ -529,10 +557,10 @@ var p = Vector2.prototype;
 	 */
 	p.getMirror = function( vector )
 	{
-		
+
 		return new qlib.Vector2( 2 * vector.x - this.x, 2 * vector.y - this.y );
 	}
-	
+
 	/**
 	 * Creates a new vector by projecting this vector onto the line segment defined by points a and b.
 	 * @param {qlib.Vector2} a - The first point of the line segment.
@@ -541,18 +569,18 @@ var p = Vector2.prototype;
 	 */
 	p.getProject = function( a, b )
 	{
-		
-		// upgraded version by Fabien  Bizot 
+
+		// upgraded version by Fabien  Bizot
 		// http://www.lafabrick.com/blog
 		var len = a.distanceToVector( b );
 		var r = (((a.y - this.y) * (a.y - b.y)) - ((a.x - this.x) * (b.x - a.x))) / (len * len);
-		
+
 		var px = a.x + r * (b.x - a.x);
 		var py = a.y + r * (b.y - a.y);
-		
+
 		return new qlib.Vector2(px, py);
 	}
-	
+
 	/**
 	 * Projects this vector onto the line segment defined by points a and b.
 	 * @param {qlib.Vector2} a - The first point of the line segment.
@@ -561,18 +589,18 @@ var p = Vector2.prototype;
 	 */
 	p.project = function( a, b )
 	{
-		
-		// upgraded version by Fabien  Bizot 
+
+		// upgraded version by Fabien  Bizot
 		// http://www.lafabrick.com/blog
 		var len = a.distanceToVector( b );
 		var r = (((a.y - this.y) * (a.y - b.y)) - ((a.x - this.x) * (b.x - a.x))) / (len * len);
-		
+
 		this.x = a.x + r * (b.x - a.x);
 		this.y = a.y + r * (b.y - a.y);
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Negates this vector (flips its direction).
 	 * @returns {qlib.Vector2} This vector.
@@ -583,7 +611,7 @@ var p = Vector2.prototype;
 		this.y *= -1;
 		return this;
 	}
-		
+
 	/**
 	 * Creates a new vector by negating this vector.
 	 * @returns {qlib.Vector2} The new negated vector.
@@ -592,7 +620,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( -this.x , -this.y );
 	}
-		
+
 	/**
 	 * Makes this vector orthogonal (perpendicular) to its current direction.
 	 * Rotates the vector 90 degrees counter-clockwise.
@@ -605,7 +633,7 @@ var p = Vector2.prototype;
 		this.x = tx;
 		return this;
 	}
-		
+
 	/**
 	 * Creates a new orthogonal (perpendicular) vector from this vector.
 	 * Rotates the vector 90 degrees counter-clockwise.
@@ -615,7 +643,7 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2( -this.y, this.x );
 	}
-		
+
 	/**
 	 * Normalizes this vector (scales it to unit length).
 	 * @returns {qlib.Vector2} This vector.
@@ -632,7 +660,7 @@ var p = Vector2.prototype;
 		}
 		return this;
 	}
-		
+
 	/**
 	 * Creates a new normalized vector (unit length) from this vector.
 	 * @returns {qlib.Vector2} The new normalized vector, or (0,0) if this vector has zero length.
@@ -647,7 +675,7 @@ var p = Vector2.prototype;
 			return new qlib.Vector2();
 		}
 	}
-		
+
 	/**
 	 * Makes this vector a normal vector (perpendicular and unit length).
 	 * Rotates 90 degrees counter-clockwise and normalizes.
@@ -666,7 +694,7 @@ var p = Vector2.prototype;
 		}
 		return this;
 	}
-		
+
 	/**
 	 * Creates a new normal vector (perpendicular and unit length) from this vector.
 	 * Rotates 90 degrees counter-clockwise and normalizes.
@@ -680,7 +708,7 @@ var p = Vector2.prototype;
 		else
 			return new qlib.Vector2();
 	}
-	
+
 	/**
 	 * Rotates this vector around a specific point.
 	 * @param {number} angle - The angle of rotation in radians.
@@ -694,7 +722,7 @@ var p = Vector2.prototype;
 		this.plus(rotationPoint);
 		return this;
 	 }
-	
+
 	/**
 	 * Creates a new vector by rotating this vector around a specific point.
 	 * @param {number} angle - The angle of rotation in radians.
@@ -708,7 +736,7 @@ var p = Vector2.prototype;
 		p.plus(rotationPoint);
 		return p;
 	}
-	
+
 	/**
 	 * Rotates this vector by a specific angle.
 	 * @param {number} angle - The angle of rotation in radians.
@@ -723,7 +751,7 @@ var p = Vector2.prototype;
 		this.x = rx;
 		return this;
 	}
-	
+
 	/**
 	 * Rotates this vector using pre-calculated cosine and sine of the angle.
 	 * @param {number} ca - The cosine of the angle.
@@ -737,7 +765,7 @@ var p = Vector2.prototype;
 		this.x = rx;
 		return this;
 	}
-	
+
 	/**
 	 * Creates a new vector by rotating this vector by a specific angle.
 	 * @param {number} angle - The angle of rotation in radians.
@@ -748,40 +776,40 @@ var p = Vector2.prototype;
 		var ca = Math.cos ( angle );
 		var sa = Math.sin ( angle );
 		var rx = this.x * ca - this.y * sa;
-		
+
 		return new qlib.Vector2( rx, this.x * sa + this.y * ca );
 	}
-	
+
 	/**
 	 * Checks if this vector's components are strictly less than another vector's components.
 	 * @param {qlib.Vector2} v - The other vector.
-	 * @returns {boolean} True if this.x < v.x and this.y < v.y.
+	 * @returns {boolean} True if this.x &lt; v.x and this.y &lt; v.y.
 	 */
-	p.isLower = function(v) 
+	p.isLower = function(v)
 	{
-		return (this.x<v.x && this.y<v.y);
+		return (this.x&lt;v.x &amp;&amp; this.y&lt;v.y);
 	};
-	
+
 	/**
 	 * Checks if this vector's components are less than or equal to another vector's components.
 	 * @param {qlib.Vector2} v - The other vector.
-	 * @returns {boolean} True if this.x <= v.x and this.y <= v.y.
+	 * @returns {boolean} True if this.x &lt;= v.x and this.y &lt;= v.y.
 	 */
-	p.isLowerOrEqual = function(v) 
+	p.isLowerOrEqual = function(v)
 	{
-		return (this.x<=v.x && this.y<=v.y);
+		return (this.x&lt;=v.x &amp;&amp; this.y&lt;=v.y);
 	};
-	
+
 	/**
 	 * Checks if this vector's components are strictly greater than another vector's components.
 	 * @param {qlib.Vector2} v - The other vector.
 	 * @returns {boolean} True if this.x > v.x and this.y > v.y.
 	 */
-	p.isGreater = function(v) 
+	p.isGreater = function(v)
 	{
-		return (this.x>v.x && this.y>v.y);
+		return (this.x>v.x &amp;&amp; this.y>v.y);
 	};
-	
+
 	/**
 	 * Checks if this vector's components are greater than or equal to another vector's components.
 	 * @param {qlib.Vector2} v - The other vector.
@@ -789,20 +817,20 @@ var p = Vector2.prototype;
 	 */
 	p.isGreaterOrEqual = function(v)
 	{
-		return (this.x>=v.x && this.y>=v.y);
+		return (this.x>=v.x &amp;&amp; this.y>=v.y);
 	};
-	
+
 	/**
 	 * Checks if this vector's components are less than or equal to another vector's components.
 	 * (Identical to isLowerOrEqual)
 	 * @param {qlib.Vector2} v - The other vector.
-	 * @returns {boolean} True if this.x <= v.x and this.y <= v.y.
+	 * @returns {boolean} True if this.x &lt;= v.x and this.y &lt;= v.y.
 	 */
 	p.isLessOrEqual = function(v)
 	{
-		return (this.x<=v.x && this.y<=v.y);
+		return (this.x&lt;=v.x &amp;&amp; this.y&lt;=v.y);
 	};
-	
+
 	/**
 	 * Calculates the signed area of the triangle formed by this point and two other points (p0, p1).
 	 * This can be used to determine if this point is to the left of the directed line segment from p0 to p1.
@@ -814,68 +842,68 @@ var p = Vector2.prototype;
 	{
 		return (p1.x-p0.x)*(this.y-p0.y)-(this.x-p0.x)*(p1.y-p0.y);
 	}
-	
-	
+
+
 	/**
 	 * Sets this vector to the component-wise minimum of this vector and another vector.
 	 * @param {qlib.Vector2} v - The other vector.
 	 * @returns {qlib.Vector2} This vector.
 	 */
-	p.min = function( v ) 
+	p.min = function( v )
 	{
 		this.x = Math.min( this.x, v.x);
 		this.y = Math.min( this.y, v.y);
 		return this;
 	};
-		
+
 	/**
 	 * Sets this vector to the component-wise minimum of this vector and given x, y values.
 	 * @param {number} px - The x value.
 	 * @param {number} py - The y value.
 	 * @returns {qlib.Vector2} This vector.
 	 */
-	p.minXY  = function( px, py ) 
+	p.minXY  = function( px, py )
 	{
 		this.x = Math.min( this.x, px);
 		this.y = Math.min( this.y, py);
 		return this;
 	};
-		
+
 	/**
 	 * Creates a new vector that is the component-wise minimum of this vector and another vector.
 	 * @param {qlib.Vector2} v - The other vector.
 	 * @returns {qlib.Vector2} The new minimum vector.
 	 */
-	p.getMin = function( v ) 
+	p.getMin = function( v )
 	{
 		return new qlib.Vector2(Math.min( this.x, v.x), Math.min(this.y, v.y));
 	};
-		
+
 	/**
 	 * Sets this vector to the component-wise maximum of this vector and another vector.
 	 * @param {qlib.Vector2} v - The other vector.
 	 * @returns {qlib.Vector2} This vector.
 	 */
-	p.max = function( v ) 
+	p.max = function( v )
 	{
 		this.x = Math.max( this.x, v.x);
 		this.y = Math.max( this.y, v.y);
 		return this;
 	};
-		
+
 	/**
 	 * Sets this vector to the component-wise maximum of this vector and given x, y values.
 	 * @param {number} px - The x value.
 	 * @param {number} py - The y value.
 	 * @returns {qlib.Vector2} This vector.
 	 */
-	p.maxXY = function( px, py ) 
+	p.maxXY = function( px, py )
 	{
 		this.x = Math.max( this.x, px);
 		this.y = Math.max( this.y, py);
 		return this;
 	};
-		
+
 	/**
 	 * Creates a new vector that is the component-wise maximum of this vector and another vector.
 	 * @param {qlib.Vector2} v - The other vector.
@@ -885,8 +913,8 @@ var p = Vector2.prototype;
 	{
 		return new qlib.Vector2(Math.max( this.x, v.x), Math.max(this.y, v.y));
 	};
-	
-	
+
+
 	/**
 	 * Returns a clone of the Vector2 instance.
 	 * @returns {qlib.Vector2} a clone of the Vector2 instance.
@@ -917,7 +945,7 @@ var p = Vector2.prototype;
 			g.lineTo(this.x+offset.x,this.y+radius+offset.y);
 		}
 	}
-		
+
 	/**
 	 * Draws a circle representation of this vector on a graphics context.
 	 * @param {CanvasRenderingContext2D} g - The graphics context.
@@ -938,7 +966,7 @@ var p = Vector2.prototype;
 			g.drawCircle(this.x+offset.x,this.y+offset.y,radius);
 		}
 	}
-		
+
 	/**
 	 * Draws a rectangle (square) representation of this vector on a graphics context.
 	 * @param {CanvasRenderingContext2D} g - The graphics context.
@@ -955,8 +983,8 @@ var p = Vector2.prototype;
 			g.drawRect(this.x-radius+offset.x,this.y-radius+offset.y,radius+radius,radius+radius);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Returns a string representation of this object.
 	 * @returns {string} a string representation of the instance.
@@ -964,6 +992,28 @@ var p = Vector2.prototype;
 	p.toString = function() {
 		return "[Vector2 (x="+this.x+" y="+this.y+")]";
 	}
-	
+
 	qlib["Vector2"] = Vector2;
-}());
+}());</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="LineSegment.html">LineSegment</a></li><li><a href="Point.html">Point</a></li><li><a href="Vector2.html">Vector2</a></li></ul><h3>Global</h3><ul><li><a href="global.html#append">append</a></li><li><a href="global.html#appendArray">appendArray</a></li><li><a href="global.html#appendMatrix">appendMatrix</a></li><li><a href="global.html#appendProperties">appendProperties</a></li><li><a href="global.html#appendTransform">appendTransform</a></li><li><a href="global.html#clone">clone</a></li><li><a href="global.html#decompose">decompose</a></li><li><a href="global.html#identity">identity</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#invert">invert</a></li><li><a href="global.html#isIdentity">isIdentity</a></li><li><a href="global.html#prepend">prepend</a></li><li><a href="global.html#prependArray">prependArray</a></li><li><a href="global.html#prependMatrix">prependMatrix</a></li><li><a href="global.html#prependProperties">prependProperties</a></li><li><a href="global.html#prependTransform">prependTransform</a></li><li><a href="global.html#rotate">rotate</a></li><li><a href="global.html#scale">scale</a></li><li><a href="global.html#skew">skew</a></li><li><a href="global.html#toString">toString</a></li><li><a href="global.html#translate">translate</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 31 2025 06:36:44 GMT+0000 (Coordinated Universal Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
